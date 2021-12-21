@@ -53,6 +53,31 @@ p {
   border: none;
 }
 
+.ghost {
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
+}
+
+.blinky {
+    background-color: red;
+    border: none;
+}
+
+.pinky {
+    background-color: pink;
+    border: none;
+}
+
+.inky {
+    background-color: blue;
+    border: none;
+}
+
+.clyde {
+    background-color: orange;
+    border: none;
+}
+
 .item0 {
   background-color: green;
   border: 4px solid black;
