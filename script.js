@@ -84,10 +84,6 @@ const incrementScore = (point) => {
 };
 
 const startGame = () => {
-  var audio = new Audio('pacman_beginning.wav');
-  audio.muted = true;
-  audio.muted = false;
-  audio.play();
   setTimeout(() => {
     currentLevelArray[pacmanIndex].className = "pacman";
     movePacman();
