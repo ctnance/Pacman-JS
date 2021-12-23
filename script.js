@@ -2,13 +2,14 @@ const width = 28;
 const height = 30;
 const ghostPause = 5000;
 const powerPelletScoreValue = 10;
-const powerPelletTime = 1000;
+const powerPelletTime = 10000;
 const directions = { left: -1, right: +1, up: -width, down: +width };
 const grid = document.querySelector(".grid");
 const scoreText = document.querySelector(".score");
 
 let currentLevelArray = [];
 let pacmanIndex = 462;
+let pacmanPoweredUp = false;
 let score = 0;
 
 /*
@@ -75,7 +76,8 @@ const incrementScore = (point) => {
 };
 
 const movePacman = (e) => {
-  currentLevelArray[pacmanIndex].classList.remove("pacman");
+  // TODO: Fix the deletion of gameobjects (update logic)
+  currentLevelArray[pacmanIndex].className = "";
   switch (e.key) {
     case "ArrowUp":
     case "w":
@@ -124,6 +126,7 @@ const movePacman = (e) => {
   } else if (levelOne[pacmanIndex] === 6) {
     pacmanIndex -= width - 1;
   }
+
   currentLevelArray[pacmanIndex].className = "pacman";
   // currentLevelArray[pacmanIndex].classList.add("pacman");
 };
@@ -131,14 +134,14 @@ const movePacman = (e) => {
 const activatePowerPellet = () => {
   // Update Score
   incrementScore(powerPelletScoreValue);
+  pacmanPoweredUp = true;
   ghosts.forEach((ghost) => {
     ghost.isScared = true;
     currentLevelArray[ghost.currentIndex].classList.add("scared");
-    currentLevelArray[pacmanIndex].classList.add("powered-up");
   });
 
   setTimeout(() => {
-    currentLevelArray[pacmanIndex].classList.remove("powered-up");
+    pacmanPoweredUp = false;
     ghosts.forEach((ghost) => {
       ghost.isScared = false;
       currentLevelArray[ghost.currentIndex].classList.remove("scared");
@@ -181,26 +184,13 @@ const resetGhostState = () => {
   });
 };
 
-// ghost.timerID = setInterval(() => {
-//   console.log("LENGTH OF CUR LEV ARR: " + currentLevelArray.length)
-//   console.log("GHOST INDEX: " + ghost.currentIndex)
-//   // console.log(currentLevelArray[ghost.currentIndex]);
-//   let direction = directions[Math.floor(Math.random() * directions.length)];
-//   currentLevelArray[ghost.currentIndex].className = "";
-//   ghost.currentIndex += direction;
-//   currentLevelArray[ghost.currentIndex].className = ghost.className;
-// }, ghost.speed);
 const moveGhost = (ghost) => {
   let possibleDirections = getPossibleDirections(ghost.currentIndex);
   let nextDirection =
     possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
   let preferredHeading = nextDirection - ghost.currentIndex;
-  let moveCount = 0;
 
   ghost.timerID = setInterval(() => {
-    // Remove ghost from current index
-    currentLevelArray[ghost.currentIndex].classList.remove(ghost.className);
-
     // Move ghost
     if (levelOne[ghost.currentIndex] === 5) {
       ghost.currentIndex += width - 1;
@@ -208,49 +198,42 @@ const moveGhost = (ghost) => {
       ghost.currentIndex -= width - 1;
     } else {
       // Remove ghost current position
-      // currentLevelArray[ghost.currentIndex].classList.remove(ghost.className);
-      if (levelOne[ghost.currentIndex] === 2) {
-        preferredHeading = possibleDirections.deltaUp;
-      }
       possibleDirections = getPossibleDirections(
         ghost.currentIndex,
         preferredHeading
       );
 
-      if (possibleDirections.length === 1 && moveCount < 1) {
+      if (possibleDirections.length === 1) {
         nextDirection = possibleDirections[0];
-        moveCount++;
-        console.log("HEEEERE 1111111");
-        console.log(moveCount);
       } else {
         nextDirection =
           possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
         preferredHeading = nextDirection - ghost.currentIndex;
-        moveCount = 0;
-        console.log("HEEEERE 222222");
-        console.log(moveCount);
       }
+
+      currentLevelArray[ghost.currentIndex].className = "";
       ghost.currentIndex = nextDirection;
     }
+    // Remove ghost from current index
+    // TODO: Fix ghost clearing class name
     // Add ghost to new index
-    currentLevelArray[ghost.currentIndex].className = `${ghost.className} ghost`;
+    if (ghost.isScared)
+      currentLevelArray[
+        ghost.currentIndex
+      ].className = `${ghost.className} ghost scared`;
+    else currentLevelArray[ghost.currentIndex].className = `${ghost.className} ghost`;
   }, ghost.speed);
 };
 
 const getPossibleDirections = (index, heading = 0) => {
+  if (levelOne[index] === 2) heading = directions.up;
   let deltaUp = index + directions.up;
   let deltaDown = index + directions.down;
   let deltaLeft = index + directions.left;
   let deltaRight = index + directions.right;
 
   let deltaPos = index + heading;
-  let validMove =
-    levelOne[deltaPos] !== 1 &&
-    !currentLevelArray[deltaPos].classList.contains("ghost");
-  // console.log(currentLevelArray[index].classList.contains('ghost'));
-  console.log(currentLevelArray[deltaPos]);
-
-  //   console.log("DELTA POS: " + heading);
+  let validMove = levelOne[deltaPos] !== 1;
 
   if (heading !== 0 && validMove) {
     return [deltaPos];
@@ -266,8 +249,8 @@ createBoard();
 createGhosts(ghosts);
 
 setTimeout(() => {
-  // ghosts.forEach((ghost) => moveGhost(ghost));
-}, 0);
+  ghosts.forEach((ghost) => moveGhost(ghost));
+}, 1000);
 
 currentLevelArray[pacmanIndex].className = "pacman";
 // currentLevelArray[pacmanIndex].classList.add("pacman");
