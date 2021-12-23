@@ -1,15 +1,20 @@
 const width = 28;
 const height = 30;
+const pacmanSpeed = 275;
+const powerPelletTime = 10000;
 const ghostPause = 5000;
 const powerPelletScoreValue = 10;
-const powerPelletTime = 10000;
 const directions = { left: -1, right: +1, up: -width, down: +width };
 const grid = document.querySelector(".grid");
 const scoreText = document.querySelector(".score");
 
 let currentLevelArray = [];
-let pacmanIndex = 462;
+let pacmanIndex = 630;
+let pacmanStartDir = directions.left;
+let pacmanCurrentDir = pacmanStartDir;
+let pacmanNextDir = pacmanCurrentDir;
 let pacmanPoweredUp = false;
+let pacmanTimerID = 0;
 let score = 0;
 
 /*
@@ -75,9 +80,47 @@ const incrementScore = (point) => {
   scoreText.innerHTML = score;
 };
 
-const movePacman = (e) => {
-  // TODO: Fix the deletion of gameobjects (update logic)
-  currentLevelArray[pacmanIndex].className = "";
+const startGame = () => {
+  setTimeout(() => {
+    currentLevelArray[pacmanIndex].className = "pacman";
+    movePacman();
+
+    createGhosts(ghosts);
+
+    setTimeout(() => {
+      ghosts.forEach((ghost) => moveGhost(ghost));
+    }, ghostPause);
+  }, 1000);
+};
+
+const movePacman = () => {
+  pacmanTimerID = setInterval(() => {
+    // TODO: Fix the deletion of gameobjects (update logic)
+    currentLevelArray[pacmanIndex].className = "";
+
+    if (levelOne[pacmanIndex + pacmanNextDir] !== 1) {
+      pacmanIndex += pacmanNextDir;
+
+      if (levelOne[pacmanIndex] === 0) {
+        // Pac-dot eaten
+        incrementScore(1);
+        levelOne[pacmanIndex] = 4;
+      } else if (levelOne[pacmanIndex] === 3) {
+        activatePowerPellet();
+      } else if (levelOne[pacmanIndex] === 5) {
+        pacmanIndex += width - 1;
+      } else if (levelOne[pacmanIndex] === 6) {
+        pacmanIndex -= width - 1;
+      }
+    }
+
+    currentLevelArray[pacmanIndex].className = "pacman";
+    console.log(pacmanIndex);
+  }, pacmanSpeed);
+};
+
+const updatePacmanDir = (e) => {
+  console.log("HERE!!");
   switch (e.key) {
     case "ArrowUp":
     case "w":
@@ -86,14 +129,14 @@ const movePacman = (e) => {
           levelOne[pacmanIndex - width] !== 1 &&
           levelOne[pacmanIndex - width] !== 2
         )
-          pacmanIndex -= width;
+          pacmanNextDir = directions.up;
       }
       break;
     case "ArrowRight":
     case "d":
       if (pacmanIndex % width < width - 1) {
         if (levelOne[pacmanIndex + 1] !== 1 && levelOne[pacmanIndex + 1] !== 2)
-          pacmanIndex += 1;
+          pacmanNextDir = directions.right;
       }
       break;
     case "ArrowDown":
@@ -103,31 +146,17 @@ const movePacman = (e) => {
           levelOne[pacmanIndex + width] !== 1 &&
           levelOne[pacmanIndex + width] !== 2
         )
-          pacmanIndex += width;
+          pacmanNextDir = directions.down;
       }
       break;
     case "ArrowLeft":
     case "a":
       if (pacmanIndex % width !== 0) {
         if (levelOne[pacmanIndex - 1] !== 1 && levelOne[pacmanIndex - 1] !== 2)
-          pacmanIndex -= 1;
+          pacmanNextDir = directions.left;
       }
       break;
   }
-
-  if (levelOne[pacmanIndex] === 0) {
-    // Pac-dot eaten
-    incrementScore(1);
-    levelOne[pacmanIndex] = 4;
-  } else if (levelOne[pacmanIndex] === 3) {
-    activatePowerPellet();
-  } else if (levelOne[pacmanIndex] === 5) {
-    pacmanIndex += width - 1;
-  } else if (levelOne[pacmanIndex] === 6) {
-    pacmanIndex -= width - 1;
-  }
-
-  currentLevelArray[pacmanIndex].className = "pacman";
   // currentLevelArray[pacmanIndex].classList.add("pacman");
 };
 
@@ -246,17 +275,11 @@ const getPossibleDirections = (index, heading = 0) => {
 };
 
 createBoard();
-createGhosts(ghosts);
-
-setTimeout(() => {
-  ghosts.forEach((ghost) => moveGhost(ghost));
-}, 1000);
-
-currentLevelArray[pacmanIndex].className = "pacman";
+startGame();
 // currentLevelArray[pacmanIndex].classList.add("pacman");
 
-document.addEventListener("keyup", movePacman);
-document.addEventListener("swiped-up", movePacman);
-document.addEventListener("swiped-right", movePacman);
-document.addEventListener("swiped-down", movePacman);
-document.addEventListener("swiped-left", movePacman);
+document.addEventListener("keydown", updatePacmanDir);
+document.addEventListener("swiped-up", updatePacmanDir);
+document.addEventListener("swiped-right", updatePacmanDir);
+document.addEventListener("swiped-down", updatePacmanDir);
+document.addEventListener("swiped-left", updatePacmanDir);
