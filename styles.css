@@ -27,11 +27,11 @@ body {
 }
 
 h1 {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 p {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 /* CUSTOM STYLES */
@@ -54,28 +54,36 @@ p {
 }
 
 .ghost {
-    border-top-left-radius: 0.5em;
-    border-top-right-radius: 0.5em;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
 }
 
 .blinky {
-    background-color: red;
-    border: none;
+  background-color: red;
+  border: none;
 }
 
 .pinky {
-    background-color: pink;
-    border: none;
+  background-color: hotpink;
+  border: none;
 }
 
 .inky {
-    background-color: blue;
-    border: none;
+  background-color: blue;
+  border: none;
 }
 
 .clyde {
-    background-color: orange;
-    border: none;
+  background-color: orange;
+  border: none;
+}
+
+.powered-up {
+  background-color: green;
+}
+
+.scared {
+  background-color: cyan;
 }
 
 .item0 {
@@ -102,16 +110,16 @@ p {
 }
 
 @media screen and (min-width: 800px) {
-    .grid {
-        min-width: 20%;
-        max-width: 35%;
-        border: 4px solid blue;
-        border-radius: 0.5em;
-        box-sizing: content-box;
-      }
+  .grid {
+    min-width: 20%;
+    max-width: 35%;
+    border: 4px solid blue;
+    border-radius: 0.5em;
+    box-sizing: content-box;
+  }
 
-      .item0 {
-        background-color: green;
-        border: 6px solid black;
-      }
+  .item0 {
+    background-color: green;
+    border: 6px solid black;
+  }
 }
