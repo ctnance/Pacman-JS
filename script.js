@@ -98,7 +98,7 @@ const startGame = () => {
 //   var audio = new Audio('pacman_beginning.mp3');
 //   audio.play();
   setTimeout(() => {
-    currentLevelArray[pacmanIndex].className = "pacman";
+    currentLevelArray[pacmanIndex].classList.add("pacman");
     movePacman();
 
     createGhosts(ghosts);
@@ -161,7 +161,7 @@ const movePacman = () => {
       return;
     };
     // TODO: Fix the deletion of gameobjects (update logic)
-    currentLevelArray[pacmanIndex].className = "";
+    currentLevelArray[pacmanIndex].classList.remove("pacman");
 
     if (currentLevelData[pacmanIndex + moveQueued] !== 1 && moveQueued !== 0) {
       pacmanIndex += moveQueued;
@@ -175,6 +175,8 @@ const movePacman = () => {
     // Pac-dot eaten
     if (currentLevelData[pacmanIndex] === 0) {
       incrementScore(NORMAL_PELLET_SCORE_VALUE);
+      currentLevelArray[pacmanIndex].classList.remove("item0");
+      currentLevelArray[pacmanIndex].classList.add("item4");
     //   var audio = new Audio('collect.mp3');
     //   audio.play();
       currentLevelData[pacmanIndex] = 4;
@@ -191,7 +193,7 @@ const movePacman = () => {
       pacmanIsAlive = false;
     }
 
-    currentLevelArray[pacmanIndex].className = "pacman";
+    currentLevelArray[pacmanIndex].classList.add("pacman");
   }, PACMAN_SPEED);
 };
 
@@ -303,8 +305,6 @@ const moveGhost = (ghost) => {
       currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
     } else {
       currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
-    //   console.log(currentLevelArray[ghost.currentIndex].className);
-    //   currentLevelArray[ghost.currentIndex].className = `${ghost.className} ghost`;
     }
 }
 

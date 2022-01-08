@@ -78,8 +78,8 @@ p {
 
 .ghost {
   border: none !important;
-  border-top-left-radius: 0.5em !important;
-  border-top-right-radius: 0.5em !important;
+  border-top-left-radius: 0.65em !important;
+  border-top-right-radius: 0.65em !important;
 }
 
 .blinky {
