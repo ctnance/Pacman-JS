@@ -37,6 +37,7 @@ p {
 /* CUSTOM STYLES */
 
 .grid {
+  background-color: black;
   display: grid;
   /* grid-template-columns: repeat(28, 1fr); */
   /* width: 560px;
