@@ -47,41 +47,6 @@ p {
   box-sizing: content-box;
 }
 
-.pacman {
-  background-color: yellow;
-  border-radius: 1em;
-  border: none;
-}
-
-.ghost {
-  border-top-left-radius: 0.5em;
-  border-top-right-radius: 0.5em;
-}
-
-.blinky {
-  background-color: red;
-  border: none;
-}
-
-.pinky {
-  background-color: hotpink;
-  border: none;
-}
-
-.inky {
-  background-color: cyan;
-  border: none;
-}
-
-.clyde {
-  background-color: orange;
-  border: none;
-}
-
-.scared {
-  background-color: blue;
-}
-
 .item0 {
   background-color: green;
   border: 4px solid black;
@@ -103,6 +68,38 @@ p {
 
 .item4 {
   background-color: black;
+}
+
+.pacman {
+  background-color: yellow;
+  border-radius: 1em;
+  border: none;
+}
+
+.ghost {
+  border: none !important;
+  border-top-left-radius: 0.5em !important;
+  border-top-right-radius: 0.5em !important;
+}
+
+.blinky {
+  background-color: red !important;
+}
+
+.pinky {
+  background-color: hotpink !important;
+}
+
+.inky {
+  background-color: cyan !important;
+}
+
+.clyde {
+  background-color: orange !important;
+}
+
+.scared {
+  background-color: blue !important;
 }
 
 @media screen and (min-width: 800px) {
