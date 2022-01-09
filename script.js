@@ -5,7 +5,7 @@ const HEIGHT = 30;
 const DIRECTIONS = { left: -1, right: +1, up: -WIDTH, down: +WIDTH };
 // GAME CONFIGURATION VARIABLES
 const GAME_START_DELAY = 5200; // 5200 should be value when music set
-const GHOST_START_DELAY = 5500;
+const GHOST_START_DELAY = 200;
 const PACMAN_DEATH_ANIMATION_TIME = 2000;
 const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
 const STARTING_LIVES = 3;
@@ -28,11 +28,14 @@ let moveQueued = 0;
 let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
 let score = 0;
+let pelletsLeft = 0;
 let validKeysPressed = [];
 // TIMER IDs
-let pacmanTimerID = 0;
-let powerPelletTimerID = 0;
-let resetInputTimerID = 0;
+let pacmanTimerID = NaN;
+let powerPelletTimerID = NaN;
+let resetInputTimerID = NaN;
+// Audio Variables
+let ghostSirenSFX = new Audio('sfx/ghost_siren.mp3');
 
 /*
 0 - pac-dots
@@ -53,21 +56,21 @@ const levelOne = [
     1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1,
     1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-    5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
-    1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    4, 4, 4, 4, 4, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 4, 4, 4, 4, 4,
-    1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 4, 1, 1, 4, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 1, 1, 1, 4, 1, 1, 4, 1, 1, 1, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 4, 1, 1, 1, 2, 2, 1, 1, 1, 4, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 4, 1, 2, 2, 2, 2, 2, 2, 1, 4, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+    5, 4, 4, 4, 4, 4, 0, 4, 4, 4, 1, 2, 2, 2, 2, 2, 2, 1, 4, 4, 4, 0, 4, 4, 4, 4, 4, 6,
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 4, 1, 2, 2, 2, 2, 2, 2, 1, 4, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 1, 0, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 0, 1, 4, 4, 4, 4, 4,
+    1, 1, 1, 1, 1, 1, 0, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 0, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1,
     1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1,
-    1, 0, 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 0, 0, 1,
+    1, 0, 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 0, 0, 1,
     1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1,
     1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1,
@@ -88,6 +91,10 @@ const createBoard = () => {
         let item = document.createElement("div");
         item.className = `item${currentLevelData[i]}`;
 
+        if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
+            pelletsLeft++;
+        }
+
         item.style.aspectRatio = 1;
         GRID.appendChild(item);
 
@@ -101,8 +108,8 @@ const incrementScore = (point) => {
 };
 
 const startGame = () => {
-      let audio = new Audio('pacman_beginning.mp3');
-      audio.play();
+      let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
+      levelStartSFX.play();
     setTimeout(() => {
         currentLevelArray[pacmanIndex].classList.add("pacman");
         movePacman();
@@ -111,6 +118,8 @@ const startGame = () => {
 
         setTimeout(() => {
             ghosts.forEach((ghost) => prepareGhostMove(ghost));
+            ghostSirenSFX.loop = true;
+            ghostSirenSFX.play();
         }, GHOST_START_DELAY);
     }, GAME_START_DELAY);
 };
@@ -121,6 +130,7 @@ const stopGame = () => {
     // Stop Ghost timer
     ghosts.forEach(ghost => {
         clearInterval(ghost.timerID);
+        ghostSirenSFX.pause();
     });
 
     setTimeout(() => {
@@ -135,8 +145,9 @@ const clearGame = () => {
     moveQueued = 0;
     pacmanIsAlive = true;
     pacmanPoweredUp = false;
-    pacmanTimerID = 0;
+    pacmanTimerID = NaN;
     validKeysPressed = [];
+    pelletsLeft = 0;
     score = 0;
 
     // Remove Pacman from game board
@@ -159,6 +170,10 @@ const clearGame = () => {
     for (let i = 0; i < currentLevelData.length; i++) {
         let item = currentLevelArray[i];
         item.className = `item${currentLevelData[i]}`;
+
+        if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
+            pelletsLeft++;
+        }
     }
 }
 
@@ -171,6 +186,14 @@ const clearItemFromGrid = (itemName, index) => {
     currentLevelData[index] = 4;
     currentLevelArray[index].classList.remove(itemName);
     currentLevelArray[index].classList.add("item4");
+}
+
+const updatePelletsRemaining = () => {
+    pelletsLeft--;
+
+    if (pelletsLeft === 0) {
+        resetGame();
+    }
 }
 
 // ******************************************************************************************************
@@ -188,7 +211,7 @@ const moveIsValid = direction => {
 const movePacman = () => {
     pacmanTimerID = setInterval(() => {
         // If pacman isn't alive, stop pacman movement
-        let audio = new Audio('pacman_death_sound.mp3');
+        let audio = new Audio('sfx/pacman_death_sound.mp3');
         if (!pacmanIsAlive) {
             audio.play();
             stopGame();
@@ -216,11 +239,15 @@ const movePacman = () => {
 
 const handlePacmanCollision = () => {
     if (currentLevelData[pacmanIndex] === 0) {
-        let munchSound = new Audio('pacman_munch.mp3');
+        // Dot eaten
+        updatePelletsRemaining();
+        let munchSound = new Audio('sfx/pacman_munch.mp3');
         munchSound.play();
         incrementScore(NORMAL_PELLET_SCORE_VALUE);
         clearItemFromGrid("item0", pacmanIndex);
     } else if (currentLevelData[pacmanIndex] === 3) {
+        // Power Pellet eaten
+        updatePelletsRemaining();
         clearItemFromGrid("item3", pacmanIndex);
         activatePowerPellet();
     } else if (currentLevelData[pacmanIndex] === 5) {
@@ -231,14 +258,23 @@ const handlePacmanCollision = () => {
         // Right portal touched
         currentLevelArray[pacmanIndex].classList.remove("pacman");
         pacmanIndex -= WIDTH - 1;
-    } else if (currentLevelArray[pacmanIndex].classList.contains("ghost") && !currentLevelArray[pacmanIndex].classList.contains("scared")) {
-        pacmanIsAlive = false;
+    } else if (currentLevelArray[pacmanIndex].classList.contains("ghost")) {
+        // Pacman touched a ghost--check if scared
+        if (!currentLevelArray[pacmanIndex].classList.contains("scared")) {
+            pacmanIsAlive = false;
+        } else {
+            ghosts.forEach(ghost => {
+                if (currentLevelArray[pacmanIndex].classList.contains(ghost.name)) {
+                    ghost.retreat();
+                }
+            })
+        }
     }
 }
 
 const updatePacmanDir = (e) => {
     if (!pacmanIsAlive) return;
-    let validKeys = ["ArrowUp", "w", "ArrowRight", "d", "ArrowDown", "s", "ArrowLeft", "a"]
+    let validKeys = ["ArrowUp", "w", "ArrowRight", "d", "ArrowDown", "s", "ArrowLeft", "a"];
     let key = e.key;
 
     if (validKeys.includes(key) && !validKeysPressed.includes(key)) {
@@ -271,13 +307,20 @@ const activatePowerPellet = () => {
     // Update Score
     incrementScore(POWER_PELLET_SCORE_VALUE);
     pacmanPoweredUp = true;
+    ghostSirenSFX.pause();
+    ghostSirenSFX = new Audio('sfx/power_pellet.mp3');
+    ghostSirenSFX.loop = true;
+    ghostSirenSFX.play();
     ghosts.forEach((ghost) => {
         ghost.toggleIsScared(true);
     });
 
     powerPelletTimerID = setTimeout(() => {
         pacmanPoweredUp = false;
-        console.log("TIME TO UNSCARE!");
+        ghostSirenSFX.pause();
+        ghostSirenSFX = new Audio('sfx/ghost_siren.mp3');
+        ghostSirenSFX.loop = true;
+        ghostSirenSFX.play();
         ghosts.forEach((ghost) => {
             ghost.toggleIsScared(false);
         });
@@ -296,6 +339,7 @@ class Ghost {
         this.currentIndex = startIndex;
         this.isScared = false;
         this.timerID = NaN;
+        this.isRetreating = false;
     }
     div = document.createElement("div");
 
@@ -314,11 +358,26 @@ class Ghost {
     handleCollision() {
         if (currentLevelArray[this.currentIndex].classList.contains("pacman")) {
             if (this.isScared) {
-                currentLevelArray[this.currentIndex].classList.remove(...this.classList);
-                this.currentIndex = this.startIndex;
+                this.retreat();
                 incrementScore(GHOST_EATEN_SCORE_VALUE);
+            } else {
+                pacmanIsAlive = false;
             }
         }
+    }
+
+    retreat()  {
+        if (this.isRetreating) return;
+        let audio = new Audio('sfx/eat_ghost.mp3');
+        audio.play();
+        this.isRetreating = true;
+        currentLevelArray[this.currentIndex].classList.remove(...this.classList);
+        this.currentIndex = this.startIndex;
+        clearInterval(this.timerID);
+        setTimeout(() => {
+            this.isRetreating = false;
+            prepareGhostMove(this);
+        }, 1000);
     }
 }
 
@@ -351,14 +410,6 @@ const prepareGhostMove = ghost => {
         } else if (currentLevelData[ghost.currentIndex] === 6) {
             ghost.currentIndex -= WIDTH - 1;
             // If Ghost touched Pacman
-        } else if (currentLevelArray[ghost.currentIndex].classList.contains("pacman")) {
-            if (ghost.isScared) {
-                currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
-                ghost.currentIndex = ghost.startIndex;
-                incrementScore(GHOST_EATEN_SCORE_VALUE);
-            } else {
-                pacmanIsAlive = false;
-            }
         } else {
             possibleDIRECTIONS = getPossibleDIRECTIONS(
                 ghost.currentIndex,

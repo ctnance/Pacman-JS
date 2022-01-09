@@ -49,8 +49,9 @@ p {
 }
 
 .item0 {
-  background-color: green;
-  border: 4px solid black;
+  background-color: pink;
+  border: 12px solid black;
+  /* border-radius: 1em; */
 }
 
 .item1 {
@@ -63,7 +64,7 @@ p {
 
 .item3 {
   background-color: orange;
-  border: 4px solid black;
+  border: 6px solid black;
   border-radius: 1em;
 }
 
@@ -113,7 +114,7 @@ p {
   }
 
   .item0 {
-    background-color: green;
-    border: 6px solid black;
+    background-color: pink;
+    border: 8px solid black;
   }
 }
