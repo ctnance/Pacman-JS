@@ -7,6 +7,7 @@ const DIRECTIONS = { left: -1, right: +1, up: -WIDTH, down: +WIDTH };
 const GAME_START_DELAY = 5200; // 5200 should be value when music set
 const GHOST_START_DELAY = 200;
 const PACMAN_DEATH_ANIMATION_TIME = 2000;
+const VICTORY_PAUSE_TIME = 2250;
 const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
 const STARTING_LIVES = 3;
 const PACMAN_SPEED = 265; // 214
@@ -124,7 +125,7 @@ const startGame = () => {
     }, GAME_START_DELAY);
 };
 
-const stopGame = () => {
+const stopGame = timeBeforeReset => {
     clearInterval(pacmanTimerID);
 
     // Stop Ghost timer
@@ -135,7 +136,7 @@ const stopGame = () => {
 
     setTimeout(() => {
         resetGame();
-    }, PACMAN_DEATH_ANIMATION_TIME);
+    }, timeBeforeReset);
 }
 
 const clearGame = () => {
@@ -145,10 +146,13 @@ const clearGame = () => {
     moveQueued = 0;
     pacmanIsAlive = true;
     pacmanPoweredUp = false;
-    pacmanTimerID = NaN;
     validKeysPressed = [];
     pelletsLeft = 0;
     score = 0;
+
+    // Stop active timers
+    if (pacmanTimerID) clearInterval(pacmanTimerID);
+    if (powerPelletTimerID) clearTimeout(powerPelletTimerID);
 
     // Remove Pacman from game board
     currentLevelArray[pacmanIndex].classList.remove("pacman");
@@ -192,7 +196,9 @@ const updatePelletsRemaining = () => {
     pelletsLeft--;
 
     if (pelletsLeft === 0) {
-        resetGame();
+        let victorySFX = new Audio('sfx/victory.mp3');
+        victorySFX.play();
+        stopGame(VICTORY_PAUSE_TIME);
     }
 }
 
@@ -211,16 +217,14 @@ const moveIsValid = direction => {
 const movePacman = () => {
     pacmanTimerID = setInterval(() => {
         // If pacman isn't alive, stop pacman movement
-        let audio = new Audio('sfx/pacman_death_sound.mp3');
+        let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
         if (!pacmanIsAlive) {
-            audio.play();
-            stopGame();
+            deathSFX.play();
+            stopGame(PACMAN_DEATH_ANIMATION_TIME);
             return;
         };
 
-        // TODO: Fix the deletion of gameobjects (update logic)
         currentLevelArray[pacmanIndex].classList.remove("pacman");
-
 
         if (moveIsValid(pacmanIndex + moveQueued) && moveQueued !== 0) {
             pacmanIndex += moveQueued;
