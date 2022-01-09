@@ -1,11 +1,15 @@
+// GAME BOARD DIMENSIONS
 const WIDTH = 28;
 const HEIGHT = 30;
+// DIRECTIONAL VALUES
 const DIRECTIONS = { left: -1, right: +1, up: -WIDTH, down: +WIDTH };
+// GAME CONFIGURATION VARIABLES
 const GAME_START_DELAY = 5200; // 5200 should be value when music set
-const GHOST_PAUSE = 5500;
-const INPUT_DELAY = 500; // delay when input resets--in case player inputs move a little early
+const GHOST_START_DELAY = 5500;
+const PACMAN_DEATH_ANIMATION_TIME = 2000;
+const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
 const STARTING_LIVES = 3;
-const PACMAN_SPEED = 214;
+const PACMAN_SPEED = 265; // 214
 const POWER_PELLET_TIME = 10000;
 const PACMAN_START_INDEX = 630;
 const PACMAN_START_DIR = DIRECTIONS.left;
@@ -15,6 +19,7 @@ const GHOST_EATEN_SCORE_VALUE = 100;
 const GRID = document.querySelector(".grid");
 const SCORE_TEXT = document.querySelector(".score");
 
+// Dynamic Game Variables
 let currentLevelArray = [];
 let pacmanIndex = PACMAN_START_INDEX;
 let pacmanNextDir = PACMAN_START_DIR;
@@ -22,11 +27,12 @@ let currentLives = STARTING_LIVES;
 let moveQueued = 0;
 let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
+let score = 0;
+let validKeysPressed = [];
+// TIMER IDs
 let pacmanTimerID = 0;
 let powerPelletTimerID = 0;
 let resetInputTimerID = 0;
-let validKeysPressed = [];
-let score = 0;
 
 /*
 0 - pac-dots
@@ -95,8 +101,8 @@ const incrementScore = (point) => {
 };
 
 const startGame = () => {
-    //   var audio = new Audio('pacman_beginning.mp3');
-    //   audio.play();
+      let audio = new Audio('pacman_beginning.mp3');
+      audio.play();
     setTimeout(() => {
         currentLevelArray[pacmanIndex].classList.add("pacman");
         movePacman();
@@ -105,9 +111,22 @@ const startGame = () => {
 
         setTimeout(() => {
             ghosts.forEach((ghost) => prepareGhostMove(ghost));
-        }, GHOST_PAUSE);
+        }, GHOST_START_DELAY);
     }, GAME_START_DELAY);
 };
+
+const stopGame = () => {
+    clearInterval(pacmanTimerID);
+
+    // Stop Ghost timer
+    ghosts.forEach(ghost => {
+        clearInterval(ghost.timerID);
+    });
+
+    setTimeout(() => {
+        resetGame();
+    }, PACMAN_DEATH_ANIMATION_TIME);
+}
 
 const clearGame = () => {
     currentLevelData = [...levelOne];
@@ -120,9 +139,11 @@ const clearGame = () => {
     validKeysPressed = [];
     score = 0;
 
-    // Stop Ghost timer and delete ghosts
+    // Remove Pacman from game board
+    currentLevelArray[pacmanIndex].classList.remove("pacman");
+
+    // Delete ghosts
     ghosts.forEach(ghost => {
-        clearInterval(ghost.timerID);
         delete ghost;
     });
 
@@ -139,7 +160,6 @@ const clearGame = () => {
         let item = currentLevelArray[i];
         item.className = `item${currentLevelData[i]}`;
     }
-
 }
 
 const resetGame = () => {
@@ -147,22 +167,31 @@ const resetGame = () => {
     startGame();
 }
 
-const clearItemFromGrid = itemName => {
-    currentLevelArray[pacmanIndex].classList.remove(itemName);
-    currentLevelArray[pacmanIndex].classList.add("item4");
+const clearItemFromGrid = (itemName, index) => {
+    currentLevelData[index] = 4;
+    currentLevelArray[index].classList.remove(itemName);
+    currentLevelArray[index].classList.add("item4");
 }
 
 // ******************************************************************************************************
 // Pacman logic
 
+const moveIsValid = direction => {
+    if (currentLevelData[direction] !== 1 && currentLevelData[direction] !== 2) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 const movePacman = () => {
     pacmanTimerID = setInterval(() => {
         // If pacman isn't alive, stop pacman movement
+        let audio = new Audio('pacman_death_sound.mp3');
         if (!pacmanIsAlive) {
-            // TODO Create a function to handle pacman death
-            clearInterval(pacmanTimerID);
-            currentLevelArray[pacmanIndex].classList.remove("pacman");
-            resetGame();
+            audio.play();
+            stopGame();
             return;
         };
 
@@ -170,12 +199,12 @@ const movePacman = () => {
         currentLevelArray[pacmanIndex].classList.remove("pacman");
 
 
-        if (currentLevelData[pacmanIndex + moveQueued] !== 1 && moveQueued !== 0) {
+        if (moveIsValid(pacmanIndex + moveQueued) && moveQueued !== 0) {
             pacmanIndex += moveQueued;
             pacmanNextDir = moveQueued;
             moveQueued = 0;
         }
-        else if (currentLevelData[pacmanIndex + pacmanNextDir] !== 1) {
+        else if (moveIsValid(pacmanIndex + pacmanNextDir)) {
             pacmanIndex += pacmanNextDir;
         }
 
@@ -186,22 +215,21 @@ const movePacman = () => {
 };
 
 const handlePacmanCollision = () => {
-    // Pac-dot eaten
     if (currentLevelData[pacmanIndex] === 0) {
-        //   var audio = new Audio('collect.mp3');
-        //   audio.play();
+        let munchSound = new Audio('pacman_munch.mp3');
+        munchSound.play();
         incrementScore(NORMAL_PELLET_SCORE_VALUE);
-        clearItemFromGrid("item0");
-        currentLevelData[pacmanIndex] = 4;
-        // Power pellet eaten
+        clearItemFromGrid("item0", pacmanIndex);
     } else if (currentLevelData[pacmanIndex] === 3) {
-        clearItemFromGrid("item3");
+        clearItemFromGrid("item3", pacmanIndex);
         activatePowerPellet();
-        // Left portal touched
     } else if (currentLevelData[pacmanIndex] === 5) {
+        // Left portal touched
+        currentLevelArray[pacmanIndex].classList.remove("pacman");
         pacmanIndex += WIDTH - 1;
-        // Right portal touched
     } else if (currentLevelData[pacmanIndex] === 6) {
+        // Right portal touched
+        currentLevelArray[pacmanIndex].classList.remove("pacman");
         pacmanIndex -= WIDTH - 1;
     } else if (currentLevelArray[pacmanIndex].classList.contains("ghost") && !currentLevelArray[pacmanIndex].classList.contains("scared")) {
         pacmanIsAlive = false;
@@ -239,7 +267,6 @@ const updatePacmanDir = (e) => {
 };
 
 const activatePowerPellet = () => {
-    console.log("Power Pellet Activate!")
     if (powerPelletTimerID !== 0) clearTimeout(powerPelletTimerID);
     // Update Score
     incrementScore(POWER_PELLET_SCORE_VALUE);
@@ -250,10 +277,9 @@ const activatePowerPellet = () => {
 
     powerPelletTimerID = setTimeout(() => {
         pacmanPoweredUp = false;
+        console.log("TIME TO UNSCARE!");
         ghosts.forEach((ghost) => {
-            console.log("TIME TO UNSCARE YO!")
             ghost.toggleIsScared(false);
-            console.log(ghost.classList);
         });
     }, POWER_PELLET_TIME);
 };
@@ -274,13 +300,25 @@ class Ghost {
     div = document.createElement("div");
 
     toggleIsScared(isScared) {
-        if (isScared && !this.classList.contains("scared")) this.classList.push("scared");
-        else this.classList.pop;
-
-        console.log("UPDATED SCARED TO = " + isScared)
-        console.log(this.classList);
-
+        if (isScared && !this.classList.includes("scared")) this.classList.push("scared");
+        else this.classList.pop();
+        currentLevelArray[this.currentIndex].classList.remove("scared");
         this.isScared = isScared;
+    }
+
+    move() {
+        currentLevelArray[this.currentIndex].classList.add(...this.classList);
+        this.handleCollision();
+    }
+
+    handleCollision() {
+        if (currentLevelArray[this.currentIndex].classList.contains("pacman")) {
+            if (this.isScared) {
+                currentLevelArray[this.currentIndex].classList.remove(...this.classList);
+                this.currentIndex = this.startIndex;
+                incrementScore(GHOST_EATEN_SCORE_VALUE);
+            }
+        }
     }
 }
 
@@ -297,21 +335,6 @@ const createGhosts = ghosts => {
         return ghost;
     });
 };
-
-const moveGhost = (ghost) => {
-    if (ghost.isScared) {
-        // If ghost comes in contact with pacman
-        if (currentLevelArray[ghost.currentIndex].classList.contains("pacman")) {
-            console.log(ghost.name + " touched Pacman!");
-            currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
-            ghost.currentIndex = ghost.startIndex;
-            incrementScore(GHOST_EATEN_SCORE_VALUE);
-        }
-        currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
-    } else {
-        currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
-    }
-}
 
 const prepareGhostMove = ghost => {
     let possibleDIRECTIONS = getPossibleDIRECTIONS(ghost.currentIndex);
@@ -337,7 +360,6 @@ const prepareGhostMove = ghost => {
                 pacmanIsAlive = false;
             }
         } else {
-            // Remove ghost current position
             possibleDIRECTIONS = getPossibleDIRECTIONS(
                 ghost.currentIndex,
                 preferredHeading
@@ -351,17 +373,13 @@ const prepareGhostMove = ghost => {
                 preferredHeading = nextDirection - ghost.currentIndex;
             }
 
+            // Remove ghost current position
             currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
             ghost.currentIndex = nextDirection;
         }
-        // Remove ghost from current index
-        moveGhost(ghost);
+        ghost.move();
     }, ghost.speed);
 };
-
-const handleGhostCollision = ghost => {
-
-}
 
 const getPossibleDIRECTIONS = (index, heading = 0) => {
     if (currentLevelData[index] === 2) heading = DIRECTIONS.up;
@@ -390,7 +408,6 @@ startGame();
 
 document.addEventListener("keydown", updatePacmanDir);
 document.addEventListener("keyup", e => {
-    // TODO: Logic here needs fixed to avoid buggy movement
     let key = e.key;
 
     let index = validKeysPressed.indexOf(key);
