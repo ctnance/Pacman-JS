@@ -7,7 +7,7 @@ const DIRECTIONS = { left: -1, right: +1, up: -WIDTH, down: +WIDTH };
 const GAME_START_DELAY = 5200; // 5200 should be value when music set
 const GHOST_START_DELAY = 200;
 const PACMAN_DEATH_ANIMATION_TIME = 2000;
-const VICTORY_PAUSE_TIME = 2250;
+const VICTORY_PAUSE_TIME = 2500;
 const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
 const STARTING_LIVES = 3;
 const PACMAN_SPEED = 265; // 214
@@ -17,8 +17,6 @@ const PACMAN_START_DIR = DIRECTIONS.left;
 const NORMAL_PELLET_SCORE_VALUE = 1;
 const POWER_PELLET_SCORE_VALUE = 10;
 const GHOST_EATEN_SCORE_VALUE = 100;
-const GRID = document.querySelector(".grid");
-const SCORE_TEXT = document.querySelector(".score");
 
 // Dynamic Game Variables
 let currentLevelArray = [];
@@ -82,12 +80,92 @@ const levelOne = [
 ];
 let currentLevelData = [...levelOne];
 
+const loadPage = () => {
+    let body = document.querySelector("body");
+    let startContainer = document.createElement("div");
+    startContainer.className = "start-container";
+    body.appendChild(startContainer);
+
+    // Create Header
+    let header = document.createElement("h1");
+    header.innerHTML = "Pac-Man";
+    startContainer.appendChild(header);
+    
+    let characterLabel = document.createElement("h2");
+    characterLabel.className = "character-label";
+    characterLabel.innerHTML = "The Characters";
+    startContainer.appendChild(characterLabel);
+
+    let characterRow = document.createElement("div");
+    characterRow.className = "character-row";
+    startContainer.appendChild(characterRow);
+
+    // Create pacman
+    let pacmanDisplay = createCharacter("pacman display");
+    characterRow.appendChild(pacmanDisplay);
+
+    // Create Blinky
+    let blinkyDisplay = createCharacter("blinky ghost display");
+    characterRow.appendChild(blinkyDisplay);
+
+    // Create Pinky
+    let pinkyDisplay = createCharacter("pinky ghost display");
+    characterRow.appendChild(pinkyDisplay);
+
+    // Create Inky
+    let inkyDisplay = createCharacter("inky ghost display");
+    characterRow.appendChild(inkyDisplay);
+
+    // Create Clyde
+    let clydeDisplay = createCharacter("clyde ghost display");
+    characterRow.appendChild(clydeDisplay);
+
+    let startButton = document.createElement("button")
+    startButton.innerHTML = "PLAY";
+    startButton.className = "start-btn";
+    startButton.onclick = transitionToGame;
+    startContainer.appendChild(startButton);
+}
+
+const transitionToGame = () => {
+    let body = document.querySelector("body");
+
+    let startContainer = document.querySelector(".start-container");
+    startContainer.style.opacity = "0";
+
+    setTimeout(() => {
+        startContainer.remove();
+    
+        let scoreTag = document.createElement("p");
+        scoreTag.innerHTML = `Score: <span class='score'>${score}</span>`;
+        body.appendChild(scoreTag);
+    
+        let grid = document.createElement("div");
+        grid.className = "grid";
+        body.appendChild(grid);
+    
+        createBoard();
+        startGame();
+    }, 2000);
+
+}
+
+const createCharacter = className => {
+    let character = document.createElement("div");
+    character.className = className;
+    character.style.width = '50px';
+    character.style.height = '50px';
+    character.addEventListener
+    return character;
+}
+
 // ******************************************************************************************************
 // Game Logic
 
 const createBoard = () => {
-    GRID.style.gridTemplateColumns = `repeat(${WIDTH}, 1fr`;
-    GRID.style.gridTemplateRows = `repeat(${HEIGHT}, 1fr`;
+    let grid = document.querySelector(".grid");
+    grid.style.gridTemplateColumns = `repeat(${WIDTH}, 1fr`;
+    grid.style.gridTemplateRows = `repeat(${HEIGHT}, 1fr`;
     for (let i = 0; i < currentLevelData.length; i++) {
         let item = document.createElement("div");
         item.className = `item${currentLevelData[i]}`;
@@ -97,20 +175,22 @@ const createBoard = () => {
         }
 
         item.style.aspectRatio = 1;
-        GRID.appendChild(item);
+        grid.appendChild(item);
 
         currentLevelArray.push(item);
     }
+    pelletsLeft = 10;
 };
 
 const incrementScore = (point) => {
+    let scoreLabel = document.querySelector(".score");
     score += point;
-    SCORE_TEXT.innerHTML = score;
+    scoreLabel.innerHTML = score;
 };
 
 const startGame = () => {
-      let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
-      levelStartSFX.play();
+    let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
+    levelStartSFX.play();
     setTimeout(() => {
         currentLevelArray[pacmanIndex].classList.add("pacman");
         movePacman();
@@ -370,7 +450,7 @@ class Ghost {
         }
     }
 
-    retreat()  {
+    retreat() {
         if (this.isRetreating) return;
         let audio = new Audio('sfx/eat_ghost.mp3');
         audio.play();
@@ -458,8 +538,7 @@ const getPossibleDIRECTIONS = (index, heading = 0) => {
 
 // ******************************************************************************************************
 
-createBoard();
-startGame();
+loadPage();
 
 document.addEventListener("keydown", updatePacmanDir);
 document.addEventListener("keyup", e => {

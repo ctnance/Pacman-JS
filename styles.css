@@ -1,8 +1,7 @@
 @charset "UTF-8";
 
 :root {
-  --bg-color: hsl(240, 100%, 10%);
-  background-color: var(--bg-color);
+  background-color: black;
 }
 
 html {
@@ -30,11 +29,44 @@ h1 {
   margin-bottom: 0;
 }
 
+h1,
+h2 {
+  text-align: center;
+}
+
 p {
   margin-top: 0;
 }
 
 /* CUSTOM STYLES */
+
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 1s;
+}
+
+.character-row {
+  display: flex;
+  gap: 1em;
+}
+
+.start-btn {
+  border: 0.25em solid gray;
+  border-radius: 1em;
+  background-color: black;
+  color: gray;
+  font-size: 1em;
+  margin-top: 1em;
+  padding: 1em;
+  width: 100%;
+}
+
+.start-btn:hover {
+  border-color: #fff;
+  color: #fff;
+}
 
 .grid {
   background-color: black;
@@ -74,14 +106,14 @@ p {
 
 .pacman {
   background-color: yellow;
-  border-radius: 1em;
+  border-radius: 50%;
   border: none;
 }
 
 .ghost {
   border: none !important;
-  border-top-left-radius: 0.65em !important;
-  border-top-right-radius: 0.65em !important;
+  border-top-left-radius: 50% !important;
+  border-top-right-radius: 50% !important;
 }
 
 .blinky {
