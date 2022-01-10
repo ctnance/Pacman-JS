@@ -253,7 +253,8 @@ const updateLives = lifeAmt => {
 
 const startGame = () => {
     let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
-    levelStartSFX.play();
+    // levelStartSFX.play();
+    levelStartSFX.autoplay = true;
     setTimeout(() => {
         currentLevelArray[pacmanIndex].classList.add("pacman");
         movePacman();
@@ -373,7 +374,8 @@ const pacmanDestroyed = () => {
     pacmanIsAlive = false;
     updateLives(--currentLives);
     let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
-    deathSFX.play();
+    // deathSFX.play();
+    deathSFX.autoplay = true;
     stopGame(PACMAN_DEATH_ANIMATION_TIME);
 }
 
@@ -463,7 +465,8 @@ const updatePelletsRemaining = () => {
 
     if (pelletsLeft === 0) {
         let victorySFX = new Audio('sfx/victory.mp3');
-        victorySFX.play();
+        // victorySFX.play();
+        victorySFX.autoplay = true;
         stopGame(VICTORY_PAUSE_TIME);
     }
 }
@@ -472,7 +475,8 @@ const eatNormalPellet = () => {
     updatePelletsRemaining();
 
     let munchSound = new Audio('sfx/pacman_munch.mp3');
-    munchSound.play();
+    // munchSound.play();
+    munchSound.autoplay = true;
     incrementScore(NORMAL_PELLET_SCORE_VALUE);
     clearItemFromGrid("item0", pacmanIndex);
 }
@@ -488,7 +492,8 @@ const activatePowerPellet = () => {
     ghostSirenSFX.pause();
     ghostSirenSFX = new Audio('sfx/power_pellet.mp3');
     ghostSirenSFX.loop = true;
-    ghostSirenSFX.play();
+    ghostSirenSFX.autoplay = true;
+    // ghostSirenSFX.play();
     ghosts.forEach((ghost) => {
         ghost.toggleIsScared(true);
     });
@@ -498,8 +503,9 @@ const activatePowerPellet = () => {
         pacmanPoweredUp = false;
         ghostSirenSFX.pause();
         ghostSirenSFX = new Audio('sfx/ghost_siren.mp3');
+        ghostSirenSFX.autoplay = true;
         ghostSirenSFX.loop = true;
-        ghostSirenSFX.play();
+        // ghostSirenSFX.play();
         ghosts.forEach((ghost) => {
             ghost.toggleIsScared(false);
         });
@@ -549,8 +555,9 @@ class Ghost {
         consecutiveGhostsEaten++;
         incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
         if (this.isRetreating) return;
-        let audio = new Audio('sfx/eat_ghost.mp3');
-        audio.play();
+        let eatGhostSFX = new Audio('sfx/eat_ghost.mp3');
+        eatGhostSFX.autoplay = true;
+        // audio.play();
         this.isRetreating = true;
         currentLevelArray[this.currentIndex].classList.remove(...this.classList);
         this.currentIndex = this.startIndex;
