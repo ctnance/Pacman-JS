@@ -152,6 +152,10 @@ const transitionToGame = () => {
         scoreTag.innerHTML = `Score: <span class='score'>${score}</span>`;
         body.appendChild(scoreTag);
 
+        let livesTag = document.createElement("p");
+        livesTag.innerHTML = `Lives: <span class='lives'>${currentLives}</span>`;
+        body.appendChild(livesTag);
+
         let grid = document.createElement("div");
         grid.className = "grid";
         body.appendChild(grid);
@@ -239,6 +243,14 @@ const incrementScore = (point) => {
     scoreLabel.innerHTML = score;
 };
 
+const updateLives = lifeAmt => {
+    currentLives = lifeAmt;
+    if (currentLives < 0) currentLives = 0;
+
+    let livesLabel = document.querySelector(".lives");
+    livesLabel.innerHTML = currentLives;
+}
+
 const startGame = () => {
     let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
     levelStartSFX.play();
@@ -307,7 +319,10 @@ const clearGame = () => {
     resetBoard();
 
     currentLevelData = [...levelOne];
-    currentLives = STARTING_LIVES;
+
+    // Reset Lives
+    updateLives(STARTING_LIVES);
+
     pelletsLeft = 0;
     score = 0;
 
@@ -356,7 +371,7 @@ const moveIsValid = direction => {
 
 const pacmanDestroyed = () => {
     pacmanIsAlive = false;
-    currentLives--;
+    updateLives(--currentLives);
     let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
     deathSFX.play();
     stopGame(PACMAN_DEATH_ANIMATION_TIME);
@@ -637,11 +652,7 @@ document.addEventListener("keyup", e => {
     }
 });
 
-// TODO: Add touch screen support
-// document.addEventListener("swiped-up", updatePacmanDir);
-// document.addEventListener("swiped-right", updatePacmanDir);
-// document.addEventListener("swiped-down", updatePacmanDir);
-// document.addEventListener("swiped-left", updatePacmanDir);
+// Touch support for mobile
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 
