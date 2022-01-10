@@ -80,7 +80,11 @@ const levelOne = [
 ];
 let currentLevelData = [...levelOne];
 
-const loadPage = () => {
+// ******************************************************************************************************
+// Menu Logic
+// ******************************************************************************************************
+
+const loadMainMenu = () => {
     let body = document.querySelector("body");
     let startContainer = document.createElement("div");
     startContainer.className = "start-container";
@@ -155,7 +159,7 @@ const transitionToGame = () => {
 
 }
 
-const createCharacter = (className, color) => {
+const createCharacter = (className) => {
     let character = document.createElement("div");
     character.className = className;
     character.style.width = '50px';
@@ -165,7 +169,6 @@ const createCharacter = (className, color) => {
     character.classList.add("display");
 
     if (className.includes("pacman")) {
-        console.log("HERE")
         let mouth = document.createElement("div");
         mouth.className = "pacman-mouth";
         character.appendChild(mouth);
@@ -206,6 +209,7 @@ const createCharacter = (className, color) => {
 
 // ******************************************************************************************************
 // Game Logic
+// ******************************************************************************************************
 
 const createBoard = () => {
     let grid = document.querySelector(".grid");
@@ -583,7 +587,7 @@ const getPossibleDIRECTIONS = (index, heading = 0) => {
 
 // ******************************************************************************************************
 
-loadPage();
+loadMainMenu();
 
 document.addEventListener("keydown", updatePacmanDir);
 document.addEventListener("keyup", e => {
