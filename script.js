@@ -16,7 +16,7 @@ const PACMAN_START_INDEX = 630;
 const PACMAN_START_DIR = DIRECTIONS.left;
 const NORMAL_PELLET_SCORE_VALUE = 1;
 const POWER_PELLET_SCORE_VALUE = 10;
-const GHOST_EATEN_SCORE_VALUE = 100;
+const GHOST_EATEN_SCORE_VALUE = 200;
 
 // Dynamic Game Variables
 let currentLevelArray = [];
@@ -28,6 +28,7 @@ let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
 let score = 0;
 let pelletsLeft = 0;
+let consecutiveGhostsEaten = 0;
 let validKeysPressed = [];
 // TIMER IDs
 let pacmanTimerID = NaN;
@@ -95,7 +96,7 @@ const loadMainMenu = () => {
     header.className = "menu-header";
     header.innerHTML = "Pac-Man";
     startContainer.appendChild(header);
-    
+
     let characterLabel = document.createElement("h2");
     characterLabel.className = "character-label";
     characterLabel.innerHTML = "The Characters";
@@ -144,15 +145,15 @@ const transitionToGame = () => {
         let header = document.createElement("h1");
         header.innerHTML = "Pac-Man";
         body.appendChild(header)
-    
+
         let scoreTag = document.createElement("p");
         scoreTag.innerHTML = `Score: <span class='score'>${score}</span>`;
         body.appendChild(scoreTag);
-    
+
         let grid = document.createElement("div");
         grid.className = "grid";
         body.appendChild(grid);
-    
+
         createBoard();
         startGame();
     }, 2000);
@@ -177,7 +178,7 @@ const createCharacter = (className) => {
     character.addEventListener("mouseenter", e => {
         let characterLabel = document.querySelector(".character-label");
         characterLabel.innerHTML = className;
-        switch(className) {
+        switch (className) {
             case "pacman":
                 characterLabel.style.color = "yellow";
                 break;
@@ -320,16 +321,6 @@ const clearItemFromGrid = (itemName, index) => {
     currentLevelArray[index].classList.add("item4");
 }
 
-const updatePelletsRemaining = () => {
-    pelletsLeft--;
-
-    if (pelletsLeft === 0) {
-        let victorySFX = new Audio('sfx/victory.mp3');
-        victorySFX.play();
-        stopGame(VICTORY_PAUSE_TIME);
-    }
-}
-
 // ******************************************************************************************************
 // Pacman logic
 
@@ -372,15 +363,9 @@ const movePacman = () => {
 const handlePacmanCollision = () => {
     if (currentLevelData[pacmanIndex] === 0) {
         // Dot eaten
-        updatePelletsRemaining();
-        let munchSound = new Audio('sfx/pacman_munch.mp3');
-        munchSound.play();
-        incrementScore(NORMAL_PELLET_SCORE_VALUE);
-        clearItemFromGrid("item0", pacmanIndex);
+        eatNormalPellet();
     } else if (currentLevelData[pacmanIndex] === 3) {
         // Power Pellet eaten
-        updatePelletsRemaining();
-        clearItemFromGrid("item3", pacmanIndex);
         activatePowerPellet();
     } else if (currentLevelData[pacmanIndex] === 5) {
         // Left portal touched
@@ -434,7 +419,29 @@ const updatePacmanDir = (e) => {
     }
 };
 
+const updatePelletsRemaining = () => {
+    pelletsLeft--;
+
+    if (pelletsLeft === 0) {
+        let victorySFX = new Audio('sfx/victory.mp3');
+        victorySFX.play();
+        stopGame(VICTORY_PAUSE_TIME);
+    }
+}
+
+const eatNormalPellet = () => {
+    updatePelletsRemaining();
+
+    let munchSound = new Audio('sfx/pacman_munch.mp3');
+    munchSound.play();
+    incrementScore(NORMAL_PELLET_SCORE_VALUE);
+    clearItemFromGrid("item0", pacmanIndex);
+}
+
 const activatePowerPellet = () => {
+    updatePelletsRemaining();
+    clearItemFromGrid("item3", pacmanIndex);
+
     if (powerPelletTimerID !== 0) clearTimeout(powerPelletTimerID);
     // Update Score
     incrementScore(POWER_PELLET_SCORE_VALUE);
@@ -448,6 +455,7 @@ const activatePowerPellet = () => {
     });
 
     powerPelletTimerID = setTimeout(() => {
+        consecutiveGhostsEaten = 0;
         pacmanPoweredUp = false;
         ghostSirenSFX.pause();
         ghostSirenSFX = new Audio('sfx/ghost_siren.mp3');
@@ -489,9 +497,9 @@ class Ghost {
 
     handleCollision() {
         if (currentLevelArray[this.currentIndex].classList.contains("pacman")) {
+            console.log(this.name + " touched pacman!");
             if (this.isScared) {
                 this.retreat();
-                incrementScore(GHOST_EATEN_SCORE_VALUE);
             } else {
                 pacmanIsAlive = false;
             }
@@ -499,6 +507,8 @@ class Ghost {
     }
 
     retreat() {
+        consecutiveGhostsEaten++;
+        incrementScore(GHOST_EATEN_SCORE_VALUE*consecutiveGhostsEaten);
         if (this.isRetreating) return;
         let audio = new Audio('sfx/eat_ghost.mp3');
         audio.play();
@@ -608,54 +618,53 @@ document.addEventListener("keyup", e => {
 // document.addEventListener("swiped-right", updatePacmanDir);
 // document.addEventListener("swiped-down", updatePacmanDir);
 // document.addEventListener("swiped-left", updatePacmanDir);
-document.addEventListener('touchstart', handleTouchStart, false);        
+document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 
-var xDown = null;                                                        
+var xDown = null;
 var yDown = null;
 
 function getTouches(e) {
-  return e.touches ||             // browser API
-         e.originalEvent.touches; // jQuery
-}                                                     
+    return e.touches ||             // browser API
+        e.originalEvent.touches; // jQuery
+}
 
 function handleTouchStart(e) {
-    const firstTouch = getTouches(e)[0];                                      
-    xDown = firstTouch.clientX;                                      
-    yDown = firstTouch.clientY;                                      
-};                                                
+    const firstTouch = getTouches(e)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+};
 
 function handleTouchMove(e) {
-    e.preventDefault();
-    if ( ! xDown || ! yDown ) {
+    if (!xDown || !yDown) {
         return;
     }
 
-    var xUp = e.touches[0].clientX;                                    
+    var xUp = e.touches[0].clientX;
     var yUp = e.touches[0].clientY;
 
     var xDiff = xDown - xUp;
     var yDiff = yDown - yUp;
 
-    if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-        if ( xDiff > 0 ) {
-            /* left swipe */ 
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {/*most significant*/
+        if (xDiff > 0) {
+            /* left swipe */
             moveQueued = DIRECTIONS.left;
             pacm
         } else {
             /* right swipe */
             moveQueued = DIRECTIONS.right;
-        }                       
+        }
     } else {
-        if ( yDiff > 0 ) {
-            /* up swipe */ 
+        if (yDiff > 0) {
+            /* up swipe */
             moveQueued = DIRECTIONS.up;
-        } else { 
+        } else {
             /* down swipe */
             moveQueued = DIRECTIONS.down;
-        }                                                                 
+        }
     }
     /* reset values */
     xDown = null;
-    yDown = null;                                             
+    yDown = null;
 };
