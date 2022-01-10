@@ -228,6 +228,7 @@ p {
 
   .grid {
     width: 94%;
+    min-height: 48%;
     max-height: 60%;
     border: 4px solid blue;
     border-radius: 0.5em;
