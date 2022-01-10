@@ -88,6 +88,7 @@ const loadPage = () => {
 
     // Create Header
     let header = document.createElement("h1");
+    header.className = "menu-header";
     header.innerHTML = "Pac-Man";
     startContainer.appendChild(header);
     
@@ -101,23 +102,23 @@ const loadPage = () => {
     startContainer.appendChild(characterRow);
 
     // Create pacman
-    let pacmanDisplay = createCharacter("pacman display");
+    let pacmanDisplay = createCharacter("pacman");
     characterRow.appendChild(pacmanDisplay);
 
     // Create Blinky
-    let blinkyDisplay = createCharacter("blinky ghost display");
+    let blinkyDisplay = createCharacter("blinky");
     characterRow.appendChild(blinkyDisplay);
 
     // Create Pinky
-    let pinkyDisplay = createCharacter("pinky ghost display");
+    let pinkyDisplay = createCharacter("pinky");
     characterRow.appendChild(pinkyDisplay);
 
     // Create Inky
-    let inkyDisplay = createCharacter("inky ghost display");
+    let inkyDisplay = createCharacter("inky");
     characterRow.appendChild(inkyDisplay);
 
     // Create Clyde
-    let clydeDisplay = createCharacter("clyde ghost display");
+    let clydeDisplay = createCharacter("clyde");
     characterRow.appendChild(clydeDisplay);
 
     let startButton = document.createElement("button")
@@ -135,6 +136,10 @@ const transitionToGame = () => {
 
     setTimeout(() => {
         startContainer.remove();
+
+        let header = document.createElement("h1");
+        header.innerHTML = "Pac-Man";
+        body.appendChild(header)
     
         let scoreTag = document.createElement("p");
         scoreTag.innerHTML = `Score: <span class='score'>${score}</span>`;
@@ -150,12 +155,52 @@ const transitionToGame = () => {
 
 }
 
-const createCharacter = className => {
+const createCharacter = (className, color) => {
     let character = document.createElement("div");
     character.className = className;
     character.style.width = '50px';
     character.style.height = '50px';
-    character.addEventListener
+
+    if (className !== "pacman") character.classList.add("ghost");
+    character.classList.add("display");
+
+    if (className.includes("pacman")) {
+        console.log("HERE")
+        let mouth = document.createElement("div");
+        mouth.className = "pacman-mouth";
+        character.appendChild(mouth);
+    }
+
+    character.addEventListener("mouseenter", e => {
+        let characterLabel = document.querySelector(".character-label");
+        characterLabel.innerHTML = className;
+        switch(className) {
+            case "pacman":
+                characterLabel.style.color = "yellow";
+                break;
+            case "blinky":
+                characterLabel.style.color = "red";
+                break;
+            case "pinky":
+                characterLabel.style.color = "hotpink";
+                break;
+            case "inky":
+                characterLabel.style.color = "cyan";
+                break;
+            case "clyde":
+                characterLabel.style.color = "orange";
+                break;
+            default:
+                characterLabel.style.color = "white";
+        }
+        // characterLabel.style.color = characterLabel.style.color;
+    });
+
+    character.addEventListener("mouseleave", e => {
+        let characterLabel = document.querySelector(".character-label");
+        characterLabel.innerHTML = "The Characters";
+        characterLabel.style.color = "white";
+    });
     return character;
 }
 
