@@ -76,6 +76,7 @@ p {
   margin-top: 1em;
   padding: 1em;
   width: 100%;
+  max-width: 550px;
 }
 
 .start-btn:hover {
@@ -136,6 +137,7 @@ p {
 }
 
 .ghost {
+  position: relative;
   border: none !important;
   border-top-left-radius: 50% !important;
   border-top-right-radius: 50% !important;
@@ -161,9 +163,27 @@ p {
   background-color: blue !important;
 }
 
-/* Animation */
+/* Animations */
 
 @keyframes eat-right {
+  0% {
+    clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
+  }
+  25% {
+    clip-path: polygon(100% 60%, 44% 48%, 100% 40%);
+  }
+  50% {
+    clip-path: polygon(100% 50%, 44% 48%, 100% 50%);
+  }
+  75% {
+    clip-path: polygon(100% 59%, 44% 48%, 100% 35%);
+  }
+  100% {
+    clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
+  }
+}
+
+@keyframes flash {
   0% {
     clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
   }

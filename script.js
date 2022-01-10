@@ -135,7 +135,9 @@ const loadMainMenu = () => {
 
 const transitionToGame = () => {
     let body = document.querySelector("body");
-
+    let btn = document.querySelector(".start-btn");
+    btn.disabled = true;
+    
     let startContainer = document.querySelector(".start-container");
     startContainer.style.opacity = "0";
 
@@ -157,7 +159,6 @@ const transitionToGame = () => {
         createBoard();
         startGame();
     }, 2000);
-
 }
 
 const createCharacter = (className) => {
@@ -166,7 +167,9 @@ const createCharacter = (className) => {
     character.style.width = '50px';
     character.style.height = '50px';
 
-    if (className !== "pacman") character.classList.add("ghost");
+    if (className !== "pacman") {
+        character.classList.add("ghost");
+    }
     character.classList.add("display");
 
     if (className.includes("pacman")) {
@@ -197,7 +200,6 @@ const createCharacter = (className) => {
             default:
                 characterLabel.style.color = "white";
         }
-        // characterLabel.style.color = characterLabel.style.color;
     });
 
     character.addEventListener("mouseleave", e => {
@@ -263,31 +265,32 @@ const stopGame = timeBeforeReset => {
         ghostSirenSFX.pause();
     });
 
+    // Reset game after timer
     setTimeout(() => {
         resetGame();
     }, timeBeforeReset);
 }
 
-const clearGame = () => {
-    currentLevelData = [...levelOne];
+const resetBoard = () => {
+    // Remove Pacman from game board
+    currentLevelArray[pacmanIndex].classList.remove("pacman");
+
+    // Reset Character Variables
     pacmanIndex = PACMAN_START_INDEX;
     pacmanNextDir = PACMAN_START_DIR;
     moveQueued = 0;
     pacmanIsAlive = true;
     pacmanPoweredUp = false;
     validKeysPressed = [];
-    pelletsLeft = 0;
-    score = 0;
 
     // Stop active timers
     if (pacmanTimerID) clearInterval(pacmanTimerID);
     if (powerPelletTimerID) clearTimeout(powerPelletTimerID);
 
-    // Remove Pacman from game board
-    currentLevelArray[pacmanIndex].classList.remove("pacman");
 
     // Delete ghosts
     ghosts.forEach(ghost => {
+        currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
         delete ghost;
     });
 
@@ -298,6 +301,18 @@ const clearGame = () => {
         new Ghost("inky", 351, 300),
         new Ghost("clyde", 379, 500),
     ];
+}
+
+const clearGame = () => {
+    resetBoard();
+
+    currentLevelData = [...levelOne];
+    currentLives = STARTING_LIVES;
+    pelletsLeft = 0;
+    score = 0;
+
+    let scoreLabel = document.querySelector(".score");
+    scoreLabel.innerHTML = 0;
 
     // Reset the game board
     for (let i = 0; i < currentLevelData.length; i++) {
@@ -311,7 +326,13 @@ const clearGame = () => {
 }
 
 const resetGame = () => {
-    clearGame();
+    if (currentLives > 0) {
+        console.log("Resetting board!");
+        resetBoard();
+    } else {
+        console.log("Clearing game!")
+        clearGame();
+    }
     startGame();
 }
 
@@ -333,15 +354,17 @@ const moveIsValid = direction => {
     }
 }
 
+const pacmanDestroyed = () => {
+    pacmanIsAlive = false;
+    currentLives--;
+    let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
+    deathSFX.play();
+    stopGame(PACMAN_DEATH_ANIMATION_TIME);
+}
+
 const movePacman = () => {
     pacmanTimerID = setInterval(() => {
         // If pacman isn't alive, stop pacman movement
-        let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
-        if (!pacmanIsAlive) {
-            deathSFX.play();
-            stopGame(PACMAN_DEATH_ANIMATION_TIME);
-            return;
-        };
 
         currentLevelArray[pacmanIndex].classList.remove("pacman");
 
@@ -376,9 +399,10 @@ const handlePacmanCollision = () => {
         currentLevelArray[pacmanIndex].classList.remove("pacman");
         pacmanIndex -= WIDTH - 1;
     } else if (currentLevelArray[pacmanIndex].classList.contains("ghost")) {
-        // Pacman touched a ghost--check if scared
+        console.log(this.name + " touched pacman!");
+        // Pacman touched a ghost--check if scared; if so, pacman is no longer alive
         if (!currentLevelArray[pacmanIndex].classList.contains("scared")) {
-            pacmanIsAlive = false;
+            pacmanDestroyed();
         } else {
             ghosts.forEach(ghost => {
                 if (currentLevelArray[pacmanIndex].classList.contains(ghost.name)) {
@@ -501,14 +525,14 @@ class Ghost {
             if (this.isScared) {
                 this.retreat();
             } else {
-                pacmanIsAlive = false;
+                pacmanDestroyed();
             }
         }
     }
 
     retreat() {
         consecutiveGhostsEaten++;
-        incrementScore(GHOST_EATEN_SCORE_VALUE*consecutiveGhostsEaten);
+        incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
         if (this.isRetreating) return;
         let audio = new Audio('sfx/eat_ghost.mp3');
         audio.play();
