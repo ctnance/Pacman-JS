@@ -161,8 +161,46 @@ const transitionToGame = () => {
         body.appendChild(grid);
 
         createBoard();
+        displayInstructionalModal();
+        // startGame();
+    }, 1250);
+}
+
+const displayInstructionalModal = () => {
+    let body = document.querySelector("body");
+
+    let modal = document.createElement("div");
+    modal.className = "instructional-modal";
+
+    let header = document.createElement("h2");
+    header.innerText = "How To Play";
+    modal.appendChild(header);
+
+    let controlLabel = document.createElement("h3");
+    controlLabel.innerHTML = "Controls";
+    modal.appendChild(controlLabel);
+
+    let controlText = document.createElement("p");
+    controlText.innerHTML = "To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.";
+    modal.appendChild(controlText);
+
+    let objectiveLabel = document.createElement("h3");
+    objectiveLabel.innerHTML = "Objective";
+    modal.appendChild(objectiveLabel);
+
+    let objectiveText = document.createElement("p");
+    objectiveText.innerHTML = "To win, Pacman must eat all dots on the map. The special orange dots, called Power Pellets power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn. The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?"
+    modal.appendChild(objectiveText);
+
+    let exitBtn = document.createElement("button");
+    exitBtn.innerHTML = "✕";
+    exitBtn.onclick = () => {
+        modal.remove();
         startGame();
-    }, 2000);
+    }
+
+    modal.appendChild(exitBtn);
+    body.appendChild(modal);
 }
 
 const createCharacter = (className) => {
@@ -253,8 +291,7 @@ const updateLives = lifeAmt => {
 
 const startGame = () => {
     let levelStartSFX = new Audio('sfx/pacman_beginning.mp3');
-    // levelStartSFX.play();
-    levelStartSFX.autoplay = true;
+    levelStartSFX.play();
     setTimeout(() => {
         currentLevelArray[pacmanIndex].classList.add("pacman");
         movePacman();
@@ -374,8 +411,7 @@ const pacmanDestroyed = () => {
     pacmanIsAlive = false;
     updateLives(--currentLives);
     let deathSFX = new Audio('sfx/pacman_death_sound.mp3');
-    // deathSFX.play();
-    deathSFX.autoplay = true;
+    deathSFX.play();
     stopGame(PACMAN_DEATH_ANIMATION_TIME);
 }
 
@@ -465,8 +501,7 @@ const updatePelletsRemaining = () => {
 
     if (pelletsLeft === 0) {
         let victorySFX = new Audio('sfx/victory.mp3');
-        // victorySFX.play();
-        victorySFX.autoplay = true;
+        victorySFX.play();
         stopGame(VICTORY_PAUSE_TIME);
     }
 }
@@ -475,8 +510,7 @@ const eatNormalPellet = () => {
     updatePelletsRemaining();
 
     let munchSound = new Audio('sfx/pacman_munch.mp3');
-    // munchSound.play();
-    munchSound.autoplay = true;
+    munchSound.play();
     incrementScore(NORMAL_PELLET_SCORE_VALUE);
     clearItemFromGrid("item0", pacmanIndex);
 }
@@ -492,8 +526,7 @@ const activatePowerPellet = () => {
     ghostSirenSFX.pause();
     ghostSirenSFX = new Audio('sfx/power_pellet.mp3');
     ghostSirenSFX.loop = true;
-    ghostSirenSFX.autoplay = true;
-    // ghostSirenSFX.play();
+    ghostSirenSFX.play();
     ghosts.forEach((ghost) => {
         ghost.toggleIsScared(true);
     });
@@ -503,9 +536,8 @@ const activatePowerPellet = () => {
         pacmanPoweredUp = false;
         ghostSirenSFX.pause();
         ghostSirenSFX = new Audio('sfx/ghost_siren.mp3');
-        ghostSirenSFX.autoplay = true;
         ghostSirenSFX.loop = true;
-        // ghostSirenSFX.play();
+        ghostSirenSFX.play();
         ghosts.forEach((ghost) => {
             ghost.toggleIsScared(false);
         });
@@ -555,9 +587,8 @@ class Ghost {
         consecutiveGhostsEaten++;
         incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
         if (this.isRetreating) return;
-        let eatGhostSFX = new Audio('sfx/eat_ghost.mp3');
-        eatGhostSFX.autoplay = true;
-        // audio.play();
+        let audio = new Audio('sfx/eat_ghost.mp3');
+        audio.play();
         this.isRetreating = true;
         currentLevelArray[this.currentIndex].classList.remove(...this.classList);
         this.currentIndex = this.startIndex;
