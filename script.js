@@ -126,8 +126,14 @@ const loadMainMenu = () => {
     let clydeDisplay = createCharacter("clyde");
     characterRow.appendChild(clydeDisplay);
 
+    let instructionBtn = document.createElement("button");
+    instructionBtn.className = "instruction-btn";
+    instructionBtn.innerHTML = "How To Play";
+    instructionBtn.onclick = displayInstructionalModal;
+    startContainer.appendChild(instructionBtn);
+
     let startButton = document.createElement("button")
-    startButton.innerHTML = "PLAY";
+    startButton.innerHTML = "Play";
     startButton.className = "start-btn";
     startButton.onclick = transitionToGame;
     startContainer.appendChild(startButton);
@@ -161,8 +167,7 @@ const transitionToGame = () => {
         body.appendChild(grid);
 
         createBoard();
-        displayInstructionalModal();
-        // startGame();
+        startGame();
     }, 1250);
 }
 
@@ -196,7 +201,6 @@ const displayInstructionalModal = () => {
     exitBtn.innerHTML = "✕";
     exitBtn.onclick = () => {
         modal.remove();
-        startGame();
     }
 
     modal.appendChild(exitBtn);
@@ -283,7 +287,10 @@ const incrementScore = (point) => {
 
 const updateLives = lifeAmt => {
     currentLives = lifeAmt;
-    if (currentLives < 0) currentLives = 0;
+    if (currentLives < 0) {
+        currentLives = 0;
+        clearGame();
+    }
 
     let livesLabel = document.querySelector(".lives");
     livesLabel.innerHTML = currentLives;
@@ -356,16 +363,19 @@ const resetBoard = () => {
 const clearGame = () => {
     resetBoard();
 
+    if (currentLives <= 0) {
+        // Reset Lives
+        updateLives(STARTING_LIVES);
+        
+        score = 0;
+        
+        let scoreLabel = document.querySelector(".score");
+        scoreLabel.innerHTML = 0;
+    }
+    
+    // Reset level data
     currentLevelData = [...levelOne];
-
-    // Reset Lives
-    updateLives(STARTING_LIVES);
-
     pelletsLeft = 0;
-    score = 0;
-
-    let scoreLabel = document.querySelector(".score");
-    scoreLabel.innerHTML = 0;
 
     // Reset the game board
     for (let i = 0; i < currentLevelData.length; i++) {
@@ -379,7 +389,8 @@ const clearGame = () => {
 }
 
 const resetGame = () => {
-    if (currentLives > 0) {
+    console.log(currentLives);
+    if (currentLives > 0 && pelletsLeft > 0) {
         console.log("Resetting board!");
         resetBoard();
     } else {
