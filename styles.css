@@ -184,9 +184,9 @@ p {
   height: 100%;
   clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
 
-  /* animation-name: eat-right;
+  /* animation-name: eat-right; */
   animation-duration: 0.5s;
-  animation-iteration-count: infinite; */
+  animation-iteration-count: infinite;
 }
 
 .ghost {
@@ -283,8 +283,13 @@ p {
 
 @media screen and (max-width: 850px) {
   .instructional-modal {
-    width: 80%;
+    width: 90%;
   }
+
+  .instructional-modal p {
+    font-size: 0.9em;
+  }
+
   .grid {
     width: 85%;
   }
@@ -330,6 +335,28 @@ p {
   }
 
   h1 {
+    font-size: 1.5em;
+  }
+
+  .instructional-modal {
+    top: 8%;
+    width: 95%;
+  }
+
+  .instructional-modal h2 {
+    font-size: 1.25em;
+    margin-top: 0.25em;
+  }
+
+  .instructional-modal h3 {
+    font-size: 1em;
+  }
+
+  .instructional-modal p {
+    font-size: 0.7em;
+  }
+
+  .instructional-modal button {
     font-size: 1.5em;
   }
 
