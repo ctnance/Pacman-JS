@@ -191,29 +191,41 @@ p {
 
 .ghost {
   position: relative;
+}
+
+.blinky,
+.pinky,
+.inky,
+.clyde {
   border: none !important;
   border-top-left-radius: 50% !important;
   border-top-right-radius: 50% !important;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .blinky {
-  background-color: red !important;
+  background-color: red;
 }
 
 .pinky {
-  background-color: hotpink !important;
+  background-color: hotpink;
 }
 
 .inky {
-  background-color: cyan !important;
+  background-color: cyan;
 }
 
 .clyde {
-  background-color: orange !important;
+  background-color: orange;
 }
 
 .scared {
-  background-color: blue !important;
+  background-color: blue;
+}
+
+.scared .white {
+  background-color: white;
 }
 
 /* Animations */
@@ -238,19 +250,13 @@ p {
 
 @keyframes flash {
   0% {
-    clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
-  }
-  25% {
-    clip-path: polygon(100% 60%, 44% 48%, 100% 40%);
+    background-color: blue;
   }
   50% {
-    clip-path: polygon(100% 50%, 44% 48%, 100% 50%);
-  }
-  75% {
-    clip-path: polygon(100% 59%, 44% 48%, 100% 35%);
+    background-color: white;
   }
   100% {
-    clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
+    background-color: blue;
   }
 }
 

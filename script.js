@@ -589,19 +589,28 @@ class Ghost {
   div = document.createElement("div");
 
   toggleIsScared(isScared) {
-    if (isScared && !this.classList.includes("scared")) this.classList.push("scared");
-    else this.classList.pop();
+    if (isScared && !this.classList.includes("scared")) {
+      this.classList.push("scared");
+    } else {
+      this.classList.pop();
+    }
     currentLevelArray[this.currentIndex].classList.remove("scared");
     this.isScared = isScared;
   }
 
-  move() {
+  move(direction) {
+    // Remove ghost current position
+    currentLevelArray[this.currentIndex].classList.remove(...this.classList);
+    this.currentIndex = direction;
     currentLevelArray[this.currentIndex].classList.add(...this.classList);
     this.handleCollision();
   }
 
   handleCollision() {
-    if (currentLevelArray[this.currentIndex].classList.contains("pacman")) {
+    if (
+      currentLevelArray[this.currentIndex].classList.contains("pacman") ||
+      this.currentIndex === pacmanIndex
+    ) {
       console.log(this.name + " touched pacman!");
       if (this.isScared) {
         this.retreat();
@@ -670,12 +679,8 @@ const prepareGhostMove = (ghost) => {
           possibleDIRECTIONS[Math.floor(Math.random() * possibleDIRECTIONS.length)];
         preferredHeading = nextDirection - ghost.currentIndex;
       }
-
-      // Remove ghost current position
-      currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
-      ghost.currentIndex = nextDirection;
     }
-    ghost.move();
+    ghost.move(nextDirection);
   }, ghost.speed);
 };
 
