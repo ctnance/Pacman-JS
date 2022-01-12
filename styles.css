@@ -12,7 +12,9 @@ html,
 body {
   height: 100%;
   margin: 0;
+  -webkit-overflow-scrolling: touch !important;
   overflow-y: hidden;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -90,7 +92,8 @@ p {
   max-width: 225px;
 }
 
-.start-container button:hover {
+.start-container button:hover,
+.start-container button:focus {
   border-color: #fff;
   color: #fff;
 }
@@ -102,10 +105,16 @@ p {
   border: 4px solid white;
   border-radius: 1em;
   width: 50%;
+  max-height: 80%;
   background-color: black;
   padding: 1em;
   z-index: 100;
   top: 13.5%;
+  overflow-y: auto;
+}
+
+.instructional-content {
+  display: block;
 }
 
 .instructional-modal h3 {
@@ -127,7 +136,8 @@ p {
   right: 6px;
 }
 
-.instructional-modal button:hover {
+.instructional-modal button:hover,
+.instructional-modal button:focus {
   color: red;
 }
 
@@ -221,11 +231,7 @@ p {
 }
 
 .scared {
-  background-color: blue;
-}
-
-.scared .white {
-  background-color: white;
+  background-color: blue !important;
 }
 
 /* Animations */
@@ -245,18 +251,6 @@ p {
   }
   100% {
     clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
-  }
-}
-
-@keyframes flash {
-  0% {
-    background-color: blue;
-  }
-  50% {
-    background-color: white;
-  }
-  100% {
-    background-color: blue;
   }
 }
 
