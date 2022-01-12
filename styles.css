@@ -147,14 +147,29 @@ p {
 
 /* Game Styles */
 
+
 .grid {
   background-color: black;
   display: grid;
+  position: relative;
   border-radius: 0.5em;
   box-sizing: content-box;
-  width: 35%;
+  width: 80%;
+  max-width: 900px;
   border: 4px solid blue;
   box-sizing: content-box;
+}
+
+.start-timer, .game-over-label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  font-size: 3em;
+  text-align: center;
+  transform: translateY(-150%);
+  margin: auto;
+  width: 100px;
 }
 
 .item0 {
@@ -254,23 +269,8 @@ p {
   }
 }
 
-@media screen and (max-width: 1550px) {
-  .grid {
-    width: 40%;
-  }
-}
-
-@media screen and (max-width: 1350px) {
-  .grid {
-    width: 50%;
-  }
-}
-
 @media screen and (max-width: 1150px) {
   .instructional-modal {
-    width: 60%;
-  }
-  .grid {
     width: 60%;
   }
 }

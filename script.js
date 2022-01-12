@@ -302,39 +302,55 @@ const incrementScore = (point) => {
 
 const updateLives = (lifeAmt) => {
   currentLives = lifeAmt;
+
+  let livesLabel = document.querySelector(".lives");
+  livesLabel.innerHTML = currentLives;
+
   if (currentLives < 0) {
     currentLives = 0;
     clearGame();
   }
 
-  let livesLabel = document.querySelector(".lives");
-  livesLabel.innerHTML = currentLives;
 };
 
 const startGame = () => {
   let levelStartSFX = new Audio("sfx/pacman_beginning.mp3");
   levelStartSFX.play();
+  let timerID = NaN;
+  let delayInSeconds = Math.floor(GAME_START_DELAY);
+  let remainderDelay = GAME_START_DELAY % delayInSeconds;
+
+  // Create timer label and add to grid container
+  let grid = document.querySelector(".grid");
+  let startTimerLabel = document.createElement("div");
+  startTimerLabel.className = "start-timer";
+  grid.appendChild(startTimerLabel);
+
   setTimeout(() => {
-    currentLevelArray[pacmanIndex].classList.add("pacman");
-    movePacman();
+    timerID = setInterval(() => {
 
-    createGhosts(ghosts);
+      if (delayInSeconds < 1000) {
+        clearInterval(timerID);
+        startTimerLabel.remove();
 
-    setTimeout(() => {
-      ghosts.forEach((ghost) => ghost.exitGhostZone());
-      ghostSirenSFX.loop = true;
-      ghostSirenSFX.play();
-    }, GHOST_START_DELAY);
-  }, GAME_START_DELAY);
+        currentLevelArray[pacmanIndex].classList.add("pacman");
+        movePacman();
+
+        createGhosts(ghosts);
+      }
+      startTimerLabel.innerHTML = Math.floor(delayInSeconds / 1000);
+      delayInSeconds -= 1000;
+    }, 1000);
+  }, remainderDelay);
 };
 
 const stopGame = (timeBeforeReset) => {
   clearInterval(pacmanTimerID);
+  ghostSirenSFX.pause();
 
   // Stop Ghost timer
   ghosts.forEach((ghost) => {
     clearInterval(ghost.timerID);
-    ghostSirenSFX.pause();
   });
 
   // Reset game after timer
@@ -552,11 +568,13 @@ const activatePowerPellet = () => {
   pacmanPoweredUp = true;
   clearItemFromGrid("item3", pacmanIndex);
 
-  // Check if Power Pellet Timer exists; if so, reset timer and audio
+  // Check if Power Pellet Timer exists; if so, reset effect (timer and audio)
   if (powerPelletTimerID) {
     clearTimeout(powerPelletTimerID);
     ghostSirenSFX.currentTime = 0;
+    // Else, activate Power Pellet
   } else {
+    ghostSirenSFX.pause();
     ghostSirenSFX = new Audio("sfx/power_pellet.mp3");
     ghostSirenSFX.loop = true;
     ghostSirenSFX.play();
@@ -566,6 +584,7 @@ const activatePowerPellet = () => {
     });
   }
 
+  // Stop Power Pellet Effects
   powerPelletTimerID = setTimeout(() => {
     consecutiveGhostsEaten = 0;
     pacmanPoweredUp = false;
@@ -709,8 +728,11 @@ let ghosts = [
 ];
 
 const createGhosts = (ghosts) => {
+  ghostSirenSFX.loop = true;
+  ghostSirenSFX.play();
   ghosts.map((ghost) => {
     currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
+    ghost.exitGhostZone();
     return ghost;
   });
 };
