@@ -391,40 +391,55 @@ const resetBoard = () => {
 };
 
 const clearGame = () => {
-  resetBoard();
+  // Reset Lives
+  updateLives(STARTING_LIVES);
+  // Reset Score
+  score = 0;
+  let scoreLabel = document.querySelector(".score");
+  scoreLabel.innerHTML = 0;
 
-  if (currentLives <= 0) {
-    // Reset Lives
-    updateLives(STARTING_LIVES);
+// Reset level data
+currentLevelData = [...levelOne];
+pelletsLeft = 0;
 
-    score = 0;
+// Reset the game board
+for (let i = 0; i < currentLevelData.length; i++) {
+  let item = currentLevelArray[i];
+  item.className = `item${currentLevelData[i]}`;
 
-    let scoreLabel = document.querySelector(".score");
-    scoreLabel.innerHTML = 0;
+  if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
+    pelletsLeft++;
   }
-
-  // Reset level data
-  currentLevelData = [...levelOne];
-  pelletsLeft = 0;
-
-  // Reset the game board
-  for (let i = 0; i < currentLevelData.length; i++) {
-    let item = currentLevelArray[i];
-    item.className = `item${currentLevelData[i]}`;
-
-    if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
-      pelletsLeft++;
-    }
-  }
+}
 };
+
+const displayGameOver = () => {
+  // Create game over label and add to grid container
+  let grid = document.querySelector(".grid");
+  let gameOverLabel = document.createElement("div");
+  gameOverLabel.className = "game-over-label";
+  gameOverLabel.innerHTML = "Game Over!";
+  grid.appendChild(gameOverLabel);
+}
+
+const removeGameOverDisplay = () => {
+  let gameOverLabel = document.querySelector(".game-over-label");
+  gameOverLabel.remove();
+}
 
 const resetGame = () => {
   if (currentLives > 0 && pelletsLeft > 0) {
     resetBoard();
+    startGame();
   } else {
-    clearGame();
+    resetBoard();
+    displayGameOver();
+    setTimeout(() => {
+      removeGameOverDisplay();
+      clearGame();
+      startGame();
+    }, 2500);
   }
-  startGame();
 };
 
 const clearItemFromGrid = (itemName, index) => {
