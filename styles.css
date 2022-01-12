@@ -147,7 +147,6 @@ p {
 
 /* Game Styles */
 
-
 .grid {
   background-color: black;
   display: grid;
@@ -160,7 +159,8 @@ p {
   box-sizing: content-box;
 }
 
-.start-timer, .game-over-label {
+.start-timer,
+.game-over-label {
   position: absolute;
   top: 50%;
   left: 0;
@@ -284,7 +284,7 @@ p {
   .start-timer {
     font-size: 2.5em;
   }
-  
+
   .game-over-label {
     font-size: 1.25em;
   }
@@ -317,9 +317,9 @@ p {
     font-size: 2em;
     transform: translateY(-125%);
   }
-  
+
   .game-over-label {
-    font-size: 1.0em;
+    font-size: 1em;
   }
 }
 
@@ -337,16 +337,10 @@ p {
     width: 90%;
   }
 
-  .grid {
-    border: 4px solid blue;
-    border-radius: 0.5em;
-    box-sizing: content-box;
-  }
-
   .start-timer {
     font-size: 1.5em;
   }
-  
+
   .game-over-label {
     font-size: 0.8em;
   }
@@ -400,12 +394,8 @@ p {
   }
 
   .grid {
+    max-width: none;
     width: 94%;
-    min-height: 48%;
-    max-height: 60%;
-    border: 4px solid blue;
-    border-radius: 0.5em;
-    box-sizing: content-box;
   }
 
   .item0 {
