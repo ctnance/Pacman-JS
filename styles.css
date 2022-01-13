@@ -177,10 +177,6 @@ p {
   box-sizing: content-box;
 }
 
-.grid div {
-  aspect-ratio: 1;
-}
-
 .start-timer,
 .game-over-label {
   position: absolute;
