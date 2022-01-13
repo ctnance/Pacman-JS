@@ -308,7 +308,6 @@ const updateLives = (lifeAmt) => {
 
   if (currentLives < 0) {
     currentLives = 0;
-    clearGame();
   }
 
 };
@@ -351,6 +350,7 @@ const stopGame = (timeBeforeReset) => {
   // Stop Ghost timer
   ghosts.forEach((ghost) => {
     clearInterval(ghost.timerID);
+    clearTimeout(ghost.startMoveTimerID);
   });
 
   // Reset game after timer
@@ -359,7 +359,7 @@ const stopGame = (timeBeforeReset) => {
   }, timeBeforeReset);
 };
 
-const resetBoard = () => {
+const resetCharacters = () => {
   // Remove Pacman from game board
   currentLevelArray[pacmanIndex].classList.remove("pacman");
 
@@ -391,27 +391,42 @@ const resetBoard = () => {
 };
 
 const clearGame = () => {
-  // Reset Lives
-  updateLives(STARTING_LIVES);
-  // Reset Score
-  score = 0;
-  let scoreLabel = document.querySelector(".score");
-  scoreLabel.innerHTML = 0;
-
-// Reset level data
-currentLevelData = [...levelOne];
-pelletsLeft = 0;
-
-// Reset the game board
-for (let i = 0; i < currentLevelData.length; i++) {
-  let item = currentLevelArray[i];
-  item.className = `item${currentLevelData[i]}`;
-
-  if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
-    pelletsLeft++;
+  console.log("CLEARING GAME")
+  // Reset lives and score count if lives is 0
+  if (currentLives <= 0) {
+    updateLives(STARTING_LIVES);
+    score = 0;
+    let scoreLabel = document.querySelector(".score");
+    scoreLabel.innerHTML = 0;
   }
-}
+
+
+  // Reset level data
+  currentLevelData = [...levelOne];
+  pelletsLeft = 0;
+
+  // Reset the game board if all pellets collected
+
+  for (let i = 0; i < currentLevelData.length; i++) {
+    let item = currentLevelArray[i];
+    item.className = `item${currentLevelData[i]}`;
+
+    if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
+      pelletsLeft++;
+    }
+  }
 };
+
+const gameOver = () => {
+  pelletsLeft = 0;
+
+  displayGameOver();
+  setTimeout(() => {
+    removeGameOverDisplay();
+    clearGame();
+    startGame();
+  }, 2500);
+}
 
 const displayGameOver = () => {
   // Create game over label and add to grid container
@@ -428,17 +443,14 @@ const removeGameOverDisplay = () => {
 }
 
 const resetGame = () => {
-  if (currentLives > 0 && pelletsLeft > 0) {
-    resetBoard();
+  resetCharacters();
+  if (currentLives > 0) {
+    if (pelletsLeft <= 0) {
+      clearGame();
+    }
     startGame();
   } else {
-    resetBoard();
-    displayGameOver();
-    setTimeout(() => {
-      removeGameOverDisplay();
-      clearGame();
-      startGame();
-    }, 2500);
+    gameOver();
   }
 };
 
@@ -601,6 +613,7 @@ const activatePowerPellet = () => {
 
   // Stop Power Pellet Effects
   powerPelletTimerID = setTimeout(() => {
+    powerPelletTimerID = NaN;
     consecutiveGhostsEaten = 0;
     pacmanPoweredUp = false;
     ghostSirenSFX.pause();
@@ -626,6 +639,7 @@ class Ghost {
     this.currentIndex = startIndex;
     this.isScared = false;
     this.timerID = NaN;
+    this.startMoveTimerID = NaN;
     this.isRetreating = false;
   }
 
@@ -633,14 +647,14 @@ class Ghost {
     if (isScared && !this.classList.includes("scared")) {
       this.classList.push("scared");
     } else {
+      currentLevelArray[this.currentIndex].classList.remove("scared");
       this.classList.pop();
     }
-    currentLevelArray[this.currentIndex].classList.remove("scared");
     this.isScared = isScared;
   }
 
   exitGhostZone = () => {
-    setTimeout(() => {
+    this.startMoveTimerID = setTimeout(() => {
       this.timerID = setInterval(() => {
         if (currentLevelData[this.currentIndex] === 2) {
           if (currentLevelData[this.currentIndex + DIRECTIONS.up] !== 1) {
@@ -699,7 +713,12 @@ class Ghost {
 
   move(direction) {
     // Remove ghost current position; if touching ghost, only remove name
-    currentLevelArray[this.currentIndex].classList.remove(...this.classList);
+    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length+1) {
+      currentLevelArray[this.currentIndex].classList.remove(this.name);
+    } else {
+      currentLevelArray[this.currentIndex].classList.remove(...this.classList);
+    }
+      //.remove(...this.classList);
     this.currentIndex = direction;
     currentLevelArray[this.currentIndex].classList.add(...this.classList);
     this.handleCollision();
