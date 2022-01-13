@@ -221,7 +221,7 @@ p {
   background-color: orange;
   border: 6px solid black;
   border-radius: 50%;
-  animation-name: "grow";
+  /* animation-name: "grow"; */
   animation-duration: 1.5s;
   animation-iteration-count: infinite;
 }
@@ -395,7 +395,7 @@ p {
 
   .item3 {
     border: 3px solid black;
-    animation-name: "grow-med";
+    /* animation-name: "grow-med"; */
   }
 
   @keyframes grow-med {
@@ -508,7 +508,7 @@ p {
 
   .item3 {
     border: 2px solid black;
-    animation-name: "grow-small";
+    /* animation-name: "grow-small"; */
   }
 
   @keyframes grow-small {
