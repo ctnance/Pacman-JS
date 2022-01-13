@@ -169,6 +169,8 @@ const transitionToGame = () => {
     body.appendChild(grid);
 
     createBoard();
+    console.log("WIDTH OF BOARD = " + grid.clientWidth);
+    console.log("HEIGHT OF BOARD = " + grid.clientWidth);
     startGame();
   }, 1250);
 };
@@ -176,12 +178,27 @@ const transitionToGame = () => {
 const displayInstructionalModal = () => {
   let body = document.querySelector("body");
 
+  let modalWrapper = document.createElement("div");
+  modalWrapper.className = "modal-wrapper";
+
   let modal = document.createElement("div");
   modal.className = "instructional-modal";
+  modalWrapper.appendChild(modal);
+
+  let modalTopContainer = document.createElement("div");
+  modalTopContainer.className = "modal-top-container";
+  modal.appendChild(modalTopContainer);
 
   let header = document.createElement("h2");
   header.innerText = "How To Play";
-  modal.appendChild(header);
+  modalTopContainer.appendChild(header);
+
+  let exitBtn = document.createElement("button");
+  exitBtn.innerHTML = "✕";
+  modalTopContainer.appendChild(exitBtn);
+  exitBtn.onclick = () => {
+    modalWrapper.remove();
+  };
 
   let instructionalContent = document.createElement("div");
   instructionalContent.className = "instructional-content";
@@ -204,15 +221,8 @@ const displayInstructionalModal = () => {
     "To win, Pacman must eat all dots on the map. The special orange dots, called Power Pellets power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn. The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?";
   instructionalContent.appendChild(objectiveText);
 
-  let exitBtn = document.createElement("button");
-  exitBtn.innerHTML = "✕";
-  exitBtn.onclick = () => {
-    modal.remove();
-  };
-
   modal.appendChild(instructionalContent);
-  modal.appendChild(exitBtn);
-  body.appendChild(modal);
+  body.appendChild(modalWrapper);
 };
 
 const createCharacter = (className) => {
@@ -278,7 +288,7 @@ const createCharacter = (className) => {
 const createBoard = () => {
   let grid = document.querySelector(".grid");
   grid.style.gridTemplateColumns = `repeat(${WIDTH}, 1fr`;
-  grid.style.gridTemplateRows = `repeat(${HEIGHT}, 1fr`;
+  grid.style.gridTemplateRows = "1fr";
   for (let i = 0; i < currentLevelData.length; i++) {
     let item = document.createElement("div");
     item.className = `item${currentLevelData[i]}`;
@@ -287,9 +297,7 @@ const createBoard = () => {
       pelletsLeft++;
     }
 
-    item.style.aspectRatio = 1;
     grid.appendChild(item);
-
     currentLevelArray.push(item);
   }
 };
@@ -456,8 +464,6 @@ const resetGame = () => {
 const playAudio = (path, shouldLoop=false) => {
   let audio = new Audio(path);
   audio.loop = shouldLoop;
-  audio.autoplay = true;
-  audio.pause();
   audio.play();
 
   return audio;
@@ -490,8 +496,6 @@ const pacmanDestroyed = () => {
 
 const movePacman = () => {
   pacmanTimerID = setInterval(() => {
-    // If pacman isn't alive, stop pacman movement
-
     currentLevelArray[pacmanIndex].classList.remove("pacman");
 
     if (moveIsValid(pacmanIndex + moveQueued) && moveQueued !== 0) {
@@ -501,9 +505,8 @@ const movePacman = () => {
     } else if (moveIsValid(pacmanIndex + pacmanNextDir)) {
       pacmanIndex += pacmanNextDir;
     }
-
+    // Add pacman class to next location; check for collision
     currentLevelArray[pacmanIndex].classList.add("pacman");
-
     handlePacmanCollision();
   }, PACMAN_SPEED);
 };
@@ -620,7 +623,7 @@ const activatePowerPellet = () => {
     consecutiveGhostsEaten = 0;
     pacmanPoweredUp = false;
     ghostSirenSFX.pause();
-    ghostSirenSFX = playAudio("sfx/ghost_siren.mp3");
+    ghostSirenSFX = playAudio("sfx/ghost_siren.mp3", true);
     ghosts.forEach((ghost) => {
       ghost.toggleIsScared(false);
     });
@@ -713,8 +716,9 @@ class Ghost {
   };
 
   move(direction) {
-    // Remove ghost current position; if touching ghost, only remove name
-    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length+1) {
+    // Remove ghost current position; if touching ghost but not pacman, only remove name
+    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length+1 &&
+        !currentLevelArray[this.currentIndex].classList.contains("pacman")) {
       currentLevelArray[this.currentIndex].classList.remove(this.name);
     } else {
       currentLevelArray[this.currentIndex].classList.remove(...this.classList);
