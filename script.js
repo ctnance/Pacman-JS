@@ -37,7 +37,7 @@ let pacmanTimerID = NaN;
 let powerPelletTimerID = NaN;
 let resetInputTimerID = NaN;
 // Audio Variables
-let ghostSirenSFX = new Audio("sfx/ghost_siren.mp3");
+let ghostSirenSFX = undefined; // Set when ghosts are created
 
 /*
 0 - pac-dots
@@ -313,8 +313,7 @@ const updateLives = (lifeAmt) => {
 };
 
 const startGame = () => {
-  let levelStartSFX = new Audio("sfx/pacman_beginning.mp3");
-  levelStartSFX.play();
+  playAudio("sfx/pacman_beginning.mp3");
   let timerID = NaN;
   let delayInSeconds = Math.floor(GAME_START_DELAY);
   let remainderDelay = GAME_START_DELAY % delayInSeconds;
@@ -454,6 +453,16 @@ const resetGame = () => {
   }
 };
 
+const playAudio = (path, shouldLoop=false) => {
+  let audio = new Audio(path);
+  audio.loop = shouldLoop;
+  audio.autoplay = true;
+  audio.pause();
+  audio.play();
+
+  return audio;
+}
+
 const clearItemFromGrid = (itemName, index) => {
   currentLevelData[index] = 4;
   currentLevelArray[index].classList.remove(itemName);
@@ -475,8 +484,7 @@ const moveIsValid = (direction) => {
 const pacmanDestroyed = () => {
   pacmanIsAlive = false;
   updateLives(--currentLives);
-  let deathSFX = new Audio("sfx/pacman_death_sound.mp3");
-  deathSFX.play();
+  playAudio("sfx/pacman_death_sound.mp3")
   stopGame(PACMAN_DEATH_ANIMATION_TIME);
 };
 
@@ -572,17 +580,14 @@ const updatePelletsRemaining = () => {
   pelletsLeft--;
 
   if (pelletsLeft === 0) {
-    let victorySFX = new Audio("sfx/victory.mp3");
-    victorySFX.play();
+    playAudio("sfx/victory.mp3");
     stopGame(VICTORY_PAUSE_TIME);
   }
 };
 
 const eatNormalPellet = () => {
   updatePelletsRemaining();
-
-  let munchSound = new Audio("sfx/pacman_munch.mp3");
-  munchSound.play();
+  playAudio("sfx/pacman_munch.mp3");
   incrementScore(NORMAL_PELLET_SCORE_VALUE);
   clearItemFromGrid("item0", pacmanIndex);
 };
@@ -602,9 +607,7 @@ const activatePowerPellet = () => {
     // Else, activate Power Pellet
   } else {
     ghostSirenSFX.pause();
-    ghostSirenSFX = new Audio("sfx/power_pellet.mp3");
-    ghostSirenSFX.loop = true;
-    ghostSirenSFX.play();
+    ghostSirenSFX = playAudio("sfx/power_pellet.mp3", true);
 
     ghosts.forEach((ghost) => {
       ghost.toggleIsScared(true);
@@ -617,9 +620,7 @@ const activatePowerPellet = () => {
     consecutiveGhostsEaten = 0;
     pacmanPoweredUp = false;
     ghostSirenSFX.pause();
-    ghostSirenSFX = new Audio("sfx/ghost_siren.mp3");
-    ghostSirenSFX.loop = true;
-    ghostSirenSFX.play();
+    ghostSirenSFX = playAudio("sfx/ghost_siren.mp3");
     ghosts.forEach((ghost) => {
       ghost.toggleIsScared(false);
     });
@@ -741,8 +742,7 @@ class Ghost {
     if (this.isRetreating) return;
     consecutiveGhostsEaten++;
     incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
-    let audio = new Audio("sfx/eat_ghost.mp3");
-    audio.play();
+    playAudio("sfx/eat_ghost.mp3");
     this.isRetreating = true;
     currentLevelArray[this.currentIndex].classList.remove(...this.classList);
     clearInterval(this.timerID);
@@ -762,8 +762,7 @@ let ghosts = [
 ];
 
 const createGhosts = (ghosts) => {
-  ghostSirenSFX.loop = true;
-  ghostSirenSFX.play();
+  ghostSirenSFX = playAudio("sfx/ghost_siren.mp3", true);
   ghosts.map((ghost) => {
     currentLevelArray[ghost.currentIndex].classList.add(...ghost.classList);
     ghost.exitGhostZone();
