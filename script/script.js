@@ -210,18 +210,18 @@ const displayInstructionalModal = () => {
   controlLabel.innerHTML = "Controls";
   instructionalContent.appendChild(controlLabel);
 
-  let controlText = document.createElement("p");
+  let controlText = document.createElement("div");
   controlText.innerHTML =
-    "To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.";
+    "<p>To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.</p>";
   instructionalContent.appendChild(controlText);
 
   let objectiveLabel = document.createElement("h3");
   objectiveLabel.innerHTML = "Objective";
   instructionalContent.appendChild(objectiveLabel);
 
-  let objectiveText = document.createElement("p");
+  let objectiveText = document.createElement("div");
   objectiveText.innerHTML =
-    "To win, Pacman must eat all dots on the map. The special orange dots, called Power Pellets power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn. The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?";
+    "<p>To win, Pacman must eat all dots on the map.</p><p>The special orange dots, called Power Pellets, power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn.</p><p>Also, ghosts move faster after each level completed!</p><p>The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?</p>";
   instructionalContent.appendChild(objectiveText);
 
   modal.appendChild(instructionalContent);
