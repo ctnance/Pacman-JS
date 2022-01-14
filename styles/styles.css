@@ -525,7 +525,7 @@ p {
   }
 }
 
-@media (orientation: landscape) {
+@media only screen and (max-width: 1000px) and (orientation: landscape) {
   h1 {
     font-size: 1.5em;
   }
@@ -533,7 +533,10 @@ p {
     margin-bottom: 0;
   }
   .character-label {
-    font-size: 1.75em;
+    font-size: 1.5em;
+  }
+  .start-container button {
+    padding: .5em;
   }
   .game-top-container {
     display: flex;
@@ -542,11 +545,33 @@ p {
   .grid {
     width: 32%;
   }
+  .start-timer,
+  .game-over-label {
+    width: 75px;
+    transform: translateY(-70%);
+  }
+  .start-timer {
+    font-size: .75em;
+  }
+  .game-over-label {
+    font-size: 0.5em;
+  }
   .item0 {
     border: 3px solid black;
   }
   .item3 {
     border: 2px solid black;
-    animation-name: "";
+    animation-name: "grow-xsmall";
+  }
+  @keyframes grow-xsmall {
+    0% {
+      border-width: 2px;
+    }
+    50% {
+      border-width: 3px;
+    }
+    100% {
+      border-width: 2px;
+    }
   }
 }
