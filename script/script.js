@@ -28,7 +28,8 @@ let currentLives = STARTING_LIVES;
 let moveQueued = 0;
 let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
-let score = 0;
+let currentScore = 0;
+let levelsComplete = 0;
 let pelletsLeft = 0;
 let consecutiveGhostsEaten = 0;
 let validKeysPressed = [];
@@ -156,21 +157,23 @@ const transitionToGame = () => {
     header.innerHTML = "Pac-Man";
     body.appendChild(header);
 
+    let topContainer = document.createElement("div");
+    topContainer.className = "game-top-container";
+    body.appendChild(topContainer);
+
     let scoreTag = document.createElement("p");
-    scoreTag.innerHTML = `Score: <span class='score'>${score}</span>`;
-    body.appendChild(scoreTag);
+    scoreTag.innerHTML = `Score: <span class="score">${currentScore}</span>`;
+    topContainer.appendChild(scoreTag);
 
     let livesTag = document.createElement("p");
-    livesTag.innerHTML = `Lives: <span class='lives'>${currentLives}</span>`;
-    body.appendChild(livesTag);
+    livesTag.innerHTML = `Lives: <span class="lives">${currentLives}</span>`;
+    topContainer.appendChild(livesTag);
 
     let grid = document.createElement("div");
     grid.className = "grid";
     body.appendChild(grid);
 
     createBoard();
-    console.log("WIDTH OF BOARD = " + grid.clientWidth);
-    console.log("HEIGHT OF BOARD = " + grid.clientWidth);
     startGame();
   }, 1250);
 };
@@ -305,8 +308,8 @@ const createBoard = () => {
 
 const incrementScore = (point) => {
   let scoreLabel = document.querySelector(".score");
-  score += point;
-  scoreLabel.innerHTML = score;
+  currentScore += point;
+  scoreLabel.innerHTML = currentScore;
 };
 
 const updateLives = (lifeAmt) => {
@@ -388,22 +391,25 @@ const resetCharacters = () => {
     currentLevelArray[ghost.currentIndex].classList.remove(...ghost.classList);
     delete ghost;
   });
-
   // Recreate ghosts
+  let blinkySpeed = Math.max(200, 250 - (levelsComplete * 10));
+  let pinkySpeed = Math.max(350, 400 - (levelsComplete * 10));
+  let inkySpeed = Math.max(350, 300 - (levelsComplete * 10));
+  let clydeSpeed = Math.max(450, 500 - (levelsComplete * 10));
   ghosts = [
-    new Ghost("blinky", 348, 250, 0),
-    new Ghost("pinky", 376, 400, 1100),
-    new Ghost("inky", 351, 300, 2200),
-    new Ghost("clyde", 379, 500, 3300),
+    new Ghost("blinky", 348, blinkySpeed, 0),
+    new Ghost("pinky", 376, pinkySpeed, 1100),
+    new Ghost("inky", 351, inkySpeed, 2200),
+    new Ghost("clyde", 379, clydeSpeed, 3300),
   ];
 };
 
 const clearGame = () => {
-  console.log("CLEARING GAME")
   // Reset lives and score count if lives is 0
   if (currentLives <= 0) {
     updateLives(STARTING_LIVES);
-    score = 0;
+    currentScore = 0;
+    levelsComplete = 0;
     let scoreLabel = document.querySelector(".score");
     scoreLabel.innerHTML = 0;
   }
@@ -462,7 +468,18 @@ const resetGame = () => {
   }
 };
 
+const updateHighScores = () => {
+  let currentHighScore = {
+  }
+  if (typeof(Storage) !== "undefined") {
+    // window.localStorage.setItem()
+
+    // REFERENCE JSON.stringify(object)
+  }
+}
+
 const playAudio = (path, shouldLoop=false) => {
+  updateHighScores();
   let audio = new Audio(path);
   audio.loop = shouldLoop;
   audio.play();
@@ -584,6 +601,7 @@ const updatePelletsRemaining = () => {
   pelletsLeft--;
 
   if (pelletsLeft === 0) {
+    levelsComplete++;
     playAudio("sfx/victory.mp3");
     stopGame(VICTORY_PAUSE_TIME);
   }
