@@ -287,8 +287,9 @@ const createCharacter = (className) => {
 
 const createBoard = () => {
   let grid = document.querySelector(".grid");
-  grid.style.gridTemplateColumns = `repeat(${WIDTH}, 1fr`;
-  grid.style.gridTemplateRows = "1fr";
+  grid.style.gridTemplateColumns = `repeat(${WIDTH}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${HEIGHT}, 1fr)`;
+
   for (let i = 0; i < currentLevelData.length; i++) {
     let item = document.createElement("div");
     item.className = `item${currentLevelData[i]}`;

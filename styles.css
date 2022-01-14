@@ -170,16 +170,17 @@ p {
   display: grid;
   position: relative;
   border-radius: 0.5em;
-  box-sizing: content-box;
   width: 80%;
-  max-width: 900px; /* 1112.5 */
+  height: 85%;
+  max-width: 900px;
+  max-height: 964px;
   border: 4px solid blue;
   box-sizing: content-box;
 }
 
-.grid div {
+/* .grid div {
   aspect-ratio: 1/1;
-}
+} */
 
 .start-timer,
 .game-over-label {
@@ -320,6 +321,10 @@ p {
   .instructional-modal {
     width: 60%;
   }
+  .grid {
+    width: 90%;
+    height: 101.7%;
+  }
   .start-timer,
   .game-over-label {
     top: 39%;
@@ -346,6 +351,9 @@ p {
 
   .grid {
     width: 90%;
+    height: 85%;
+    max-width: 800px;
+    max-height: 857.14px;
   }
 
   .start-timer,
@@ -381,6 +389,11 @@ p {
     top: 36%;
   }
 
+  .grid {
+    max-width: 600px;
+    max-height: 642.85px;
+  }
+
   .start-timer {
     font-size: 2em;
   }
@@ -412,11 +425,14 @@ p {
 }
 
 @media screen and (max-width: 520px) {
+  .grid {
+    max-width: 450px;
+    max-height: 482px;
+  }
   .start-timer,
   .game-over-label {
     top: 34%;
   }
-
   .item0 {
     border: 3px solid black;
   }
@@ -430,6 +446,11 @@ p {
 
   .instructional-modal button {
     font-size: 2em;
+  }
+
+  .grid {
+    max-width: 400px;
+    max-height: 428.5px;
   }
 
   .start-timer,
@@ -446,7 +467,7 @@ p {
   }
 
   .game-over-label {
-    font-size: .8em;
+    font-size: 0.8em;
   }
 
   .item0 {
@@ -485,8 +506,8 @@ p {
   }
 
   .grid {
-    max-width: none;
-    width: 94%;
+    max-width: 375px;
+    max-height: 396px;
   }
 
   .start-timer,
@@ -499,7 +520,7 @@ p {
   }
 
   .game-over-label {
-    font-size: .75em;
+    font-size: 0.75em;
   }
 
   .item0 {
