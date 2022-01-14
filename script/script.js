@@ -30,6 +30,7 @@ let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
 let currentScore = 0;
 let levelsComplete = 0;
+let ghostsEaten = 0;
 let pelletsLeft = 0;
 let consecutiveGhostsEaten = 0;
 let validKeysPressed = [];
@@ -85,29 +86,42 @@ const levelOne = [
 let currentLevelData = [...levelOne];
 
 // ******************************************************************************************************
+// HELPER FUNCTIONS
+// ******************************************************************************************************
+const createElement = (elementTag, parent, className="", innerHTML="") => {
+  let element = document.createElement(elementTag);
+  element.className = className;
+  element.innerHTML = innerHTML;
+  parent.appendChild(element);
+  return element;
+}
+
+const createModal = (className, headerText) => {
+  let body = document.querySelector("body");
+  let modalWrapper = createElement("div", body, "modal-wrapper");
+  let modal = createElement("div", modalWrapper, `modal ${className}`);
+  let modalTopContainer = createElement("div", modal, "modal-top-container");
+  createElement("h2", modalTopContainer, "", headerText);
+  let exitBtn = createElement("button", modalTopContainer, "", "✕");
+  exitBtn.onclick = () => {
+    modalWrapper.remove();
+  };
+  return modal;
+}
+
+// ******************************************************************************************************
 // Menu Logic
 // ******************************************************************************************************
 
 const loadMainMenu = () => {
   let body = document.querySelector("body");
-  let startContainer = document.createElement("div");
-  startContainer.className = "start-container";
-  body.appendChild(startContainer);
+  let startContainer = createElement("div", body, "start-container");
 
   // Create Header
-  let header = document.createElement("h1");
-  header.className = "menu-header";
-  header.innerHTML = "Pac-Man";
-  startContainer.appendChild(header);
+  createElement("h1", startContainer, "menu-header", "Pac-Man");
+  createElement("h2", startContainer, "character-label", "The Characters");
 
-  let characterLabel = document.createElement("h2");
-  characterLabel.className = "character-label";
-  characterLabel.innerHTML = "The Characters";
-  startContainer.appendChild(characterLabel);
-
-  let characterRow = document.createElement("div");
-  characterRow.className = "character-row";
-  startContainer.appendChild(characterRow);
+  let characterRow = createElement("div", startContainer, "character-row");
 
   // Create pacman
   let pacmanDisplay = createCharacter("pacman");
@@ -129,17 +143,11 @@ const loadMainMenu = () => {
   let clydeDisplay = createCharacter("clyde");
   characterRow.appendChild(clydeDisplay);
 
-  let instructionBtn = document.createElement("button");
-  instructionBtn.className = "instruction-btn";
-  instructionBtn.innerHTML = "How To Play";
+  let instructionBtn = createElement("button", startContainer, "instruction-btn", "How To Play");
   instructionBtn.onclick = displayInstructionalModal;
-  startContainer.appendChild(instructionBtn);
-
-  let startButton = document.createElement("button");
-  startButton.innerHTML = "Play";
-  startButton.className = "start-btn";
+  
+  let startButton = createElement("button", startContainer, "start-btn", "Play");
   startButton.onclick = transitionToGame;
-  startContainer.appendChild(startButton);
 };
 
 const transitionToGame = () => {
@@ -153,25 +161,20 @@ const transitionToGame = () => {
   setTimeout(() => {
     startContainer.remove();
 
-    let header = document.createElement("h1");
-    header.innerHTML = "Pac-Man";
-    body.appendChild(header);
+    createElement("h1", body, "", "Pac-Man");
 
-    let topContainer = document.createElement("div");
-    topContainer.className = "game-top-container";
-    body.appendChild(topContainer);
+    let topContainer = createElement("div", body, "game-top-container");
+    // Create Label for Score and Lives
+    createElement("p", topContainer, "", `Score: <span class="score">${currentScore}</span>`);
+    createElement("p", topContainer, "", `Lives: <span class="lives">${currentLives}</span>`);
 
-    let scoreTag = document.createElement("p");
-    scoreTag.innerHTML = `Score: <span class="score">${currentScore}</span>`;
-    topContainer.appendChild(scoreTag);
-
-    let livesTag = document.createElement("p");
-    livesTag.innerHTML = `Lives: <span class="lives">${currentLives}</span>`;
-    topContainer.appendChild(livesTag);
-
-    let grid = document.createElement("div");
-    grid.className = "grid";
+    let grid = createElement("div", body, "grid");
     body.appendChild(grid);
+
+    let bottomContainer = createElement("div", body, "game-bottom-container");
+
+    let highScoreBtn = createElement("button", bottomContainer, "", "High Scores");
+    // highScoreBtn.onclick = displayHighScores;
 
     createBoard();
     startGame();
@@ -179,53 +182,29 @@ const transitionToGame = () => {
 };
 
 const displayInstructionalModal = () => {
-  let body = document.querySelector("body");
+  let modal = createModal("instructional-modal", "How To Play");
 
-  let modalWrapper = document.createElement("div");
-  modalWrapper.className = "modal-wrapper";
+  // let modalTopContainer = createElement("div", modal, "modal-top-container");
 
-  let modal = document.createElement("div");
-  modal.className = "instructional-modal";
-  modalWrapper.appendChild(modal);
+  // createElement("h2", modalTopContainer, "", "How To Play");
 
-  let modalTopContainer = document.createElement("div");
-  modalTopContainer.className = "modal-top-container";
-  modal.appendChild(modalTopContainer);
+  // let exitBtn = createElement("button", modalTopContainer, "", "✕");
+  // exitBtn.onclick = () => {
+  //   modalWrapper.remove();
+  // };
 
-  let header = document.createElement("h2");
-  header.innerText = "How To Play";
-  modalTopContainer.appendChild(header);
+  let instructionalContent = createElement("div", modal, "instructional-content");
 
-  let exitBtn = document.createElement("button");
-  exitBtn.innerHTML = "✕";
-  modalTopContainer.appendChild(exitBtn);
-  exitBtn.onclick = () => {
-    modalWrapper.remove();
-  };
-
-  let instructionalContent = document.createElement("div");
-  instructionalContent.className = "instructional-content";
-
-  let controlLabel = document.createElement("h3");
-  controlLabel.innerHTML = "Controls";
-  instructionalContent.appendChild(controlLabel);
-
-  let controlText = document.createElement("div");
-  controlText.innerHTML =
-    "<p>To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.</p>";
-  instructionalContent.appendChild(controlText);
-
-  let objectiveLabel = document.createElement("h3");
-  objectiveLabel.innerHTML = "Objective";
-  instructionalContent.appendChild(objectiveLabel);
-
-  let objectiveText = document.createElement("div");
-  objectiveText.innerHTML =
-    "<p>To win, Pacman must eat all dots on the map.</p><p>The special orange dots, called Power Pellets, power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn.</p><p>Also, ghosts move faster after each level completed!</p><p>The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?</p>";
-  instructionalContent.appendChild(objectiveText);
-
-  modal.appendChild(instructionalContent);
-  body.appendChild(modalWrapper);
+  // Create Control Label
+  createElement("h3", instructionalContent, "", "Controls");
+  // Set Controls text and content
+  let controlText = "<p>To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.</p>";
+  createElement("div", instructionalContent, "", controlText);
+  // Set Objective Label
+  createElement("h3", instructionalContent, "", "Objective");
+  // Set Objective text and content
+  let objectiveText = "<p>To win, Pacman must eat all dots on the map.</p><p>The special orange dots, called Power Pellets, power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn.</p><p>Also, ghosts move faster after each level completed!</p><p>The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?</p>";
+  createElement("div", instructionalContent, "", objectiveText)
 };
 
 const createCharacter = (className) => {
@@ -240,9 +219,7 @@ const createCharacter = (className) => {
   character.classList.add("display");
 
   if (className.includes("pacman")) {
-    let mouth = document.createElement("div");
-    mouth.className = "pacman-mouth";
-    character.appendChild(mouth);
+    createElement("div", character, "pacman-mouth");
   }
 
   character.addEventListener("mouseenter", (e) => {
@@ -294,14 +271,10 @@ const createBoard = () => {
   grid.style.gridTemplateRows = `repeat(${HEIGHT}, 1fr)`;
 
   for (let i = 0; i < currentLevelData.length; i++) {
-    let item = document.createElement("div");
-    item.className = `item${currentLevelData[i]}`;
-
+    let item = createElement("div", grid, `item${currentLevelData[i]}`);
     if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
       pelletsLeft++;
     }
-
-    grid.appendChild(item);
     currentLevelArray.push(item);
   }
 };
@@ -332,9 +305,7 @@ const startGame = () => {
 
   // Create timer label and add to grid container
   let grid = document.querySelector(".grid");
-  let startTimerLabel = document.createElement("div");
-  startTimerLabel.className = "start-timer";
-  grid.appendChild(startTimerLabel);
+  let startTimerLabel = createElement("div", grid, "start-timer", "");
 
   setTimeout(() => {
     timerID = setInterval(() => {
@@ -410,6 +381,7 @@ const clearGame = () => {
     updateLives(STARTING_LIVES);
     currentScore = 0;
     levelsComplete = 0;
+    ghostsEaten = 0;
     let scoreLabel = document.querySelector(".score");
     scoreLabel.innerHTML = 0;
   }
@@ -445,10 +417,7 @@ const gameOver = () => {
 const displayGameOver = () => {
   // Create game over label and add to grid container
   let grid = document.querySelector(".grid");
-  let gameOverLabel = document.createElement("div");
-  gameOverLabel.className = "game-over-label";
-  gameOverLabel.innerHTML = "Game Over!";
-  grid.appendChild(gameOverLabel);
+  createElement("div", grid, "game-over-label", "Game Over!");
 }
 
 const removeGameOverDisplay = () => {
@@ -468,18 +437,7 @@ const resetGame = () => {
   }
 };
 
-const updateHighScores = () => {
-  let currentHighScore = {
-  }
-  if (typeof(Storage) !== "undefined") {
-    // window.localStorage.setItem()
-
-    // REFERENCE JSON.stringify(object)
-  }
-}
-
 const playAudio = (path, shouldLoop=false) => {
-  updateHighScores();
   let audio = new Audio(path);
   audio.loop = shouldLoop;
   audio.play();
@@ -763,6 +721,7 @@ class Ghost {
 
   retreat() {
     if (this.isRetreating) return;
+    ghostsEaten++;
     consecutiveGhostsEaten++;
     incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
     playAudio("sfx/eat_ghost.mp3");
