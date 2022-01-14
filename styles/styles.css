@@ -524,3 +524,29 @@ p {
     }
   }
 }
+
+@media (orientation: landscape) {
+  h1 {
+    font-size: 1.5em;
+  }
+  .menu-header {
+    margin-bottom: 0;
+  }
+  .character-label {
+    font-size: 1.75em;
+  }
+  .game-top-container {
+    display: flex;
+    gap: 2em;
+  }  
+  .grid {
+    width: 32%;
+  }
+  .item0 {
+    border: 3px solid black;
+  }
+  .item3 {
+    border: 2px solid black;
+    animation-name: "";
+  }
+}
