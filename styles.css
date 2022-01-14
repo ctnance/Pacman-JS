@@ -171,16 +171,22 @@ p {
   position: relative;
   border-radius: 0.5em;
   width: 80%;
-  height: 85%;
-  max-width: 900px;
-  max-height: 964px;
+  max-width: 700px;
   border: 4px solid blue;
   box-sizing: content-box;
 }
 
-/* .grid div {
-  aspect-ratio: 1/1;
-} */
+.grid div::before {
+  float: left;
+  padding-top: 100%;
+  content: "";
+}
+
+.grid div::after {
+  display: block;
+  content: "";
+  clear: both;
+}
 
 .start-timer,
 .game-over-label {
@@ -206,7 +212,7 @@ p {
 
 .item0 {
   background-color: pink;
-  border: 10px solid black;
+  border: 8px solid black;
   border-radius: 50%;
 }
 
@@ -222,7 +228,7 @@ p {
   background-color: orange;
   border: 6px solid black;
   border-radius: 50%;
-  /* animation-name: "grow"; */
+  animation-name: "grow";
   animation-duration: 1.5s;
   animation-iteration-count: infinite;
 }
@@ -323,7 +329,7 @@ p {
   }
   .grid {
     width: 90%;
-    height: 101.7%;
+    max-width: 600px;
   }
   .start-timer,
   .game-over-label {
@@ -351,9 +357,7 @@ p {
 
   .grid {
     width: 90%;
-    height: 85%;
-    max-width: 800px;
-    max-height: 857.14px;
+    max-width: 600px;
   }
 
   .start-timer,
@@ -390,8 +394,8 @@ p {
   }
 
   .grid {
+    width: 92%;
     max-width: 600px;
-    max-height: 642.85px;
   }
 
   .start-timer {
@@ -407,19 +411,19 @@ p {
   }
 
   .item3 {
-    border: 3px solid black;
-    /* animation-name: "grow-med"; */
+    border: 2px solid black;
+    animation-name: "grow-med";
   }
 
   @keyframes grow-med {
     0% {
-      border-width: 3px;
+      border-width: 2px;
     }
     50% {
       border-width: 6px;
     }
     100% {
-      border-width: 3px;
+      border-width: 2px;
     }
   }
 }
@@ -528,19 +532,19 @@ p {
   }
 
   .item3 {
-    border: 2px solid black;
-    /* animation-name: "grow-small"; */
+    border: 3.5px solid black;
+    animation-name: "grow-small";
   }
 
   @keyframes grow-small {
     0% {
-      border-width: 1px;
-    }
-    50% {
       border-width: 3.5px;
     }
+    50% {
+      border-width: 5.5px;
+    }
     100% {
-      border-width: 1px;
+      border-width: 3.5px;
     }
   }
 }
