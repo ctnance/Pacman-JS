@@ -527,7 +527,8 @@ p {
 
 @media only screen and (max-width: 1000px) and (orientation: landscape) {
   h1 {
-    font-size: 1.5em;
+    margin-top: .75em;
+    font-size: 1.25em;
   }
   .menu-header {
     margin-bottom: 0;
@@ -540,8 +541,13 @@ p {
   }
   .game-top-container {
     display: flex;
-    gap: 2em;
   }  
+  .game-top-container > * {
+    margin-right: 2em;
+  }
+  .game-top-container p:last-child {
+    margin-right: 0;
+  }
   .grid {
     width: 32%;
   }
