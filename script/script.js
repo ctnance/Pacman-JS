@@ -11,7 +11,7 @@ const GHOST_START_DELAY = 200;
 const PACMAN_DEATH_ANIMATION_TIME = 2000;
 const VICTORY_PAUSE_TIME = 2500;
 const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
-const STARTING_LIVES = 3;
+const STARTING_LIVES = 1;
 const PACMAN_SPEED = 265; // 214
 const POWER_PELLET_TIME = 10000;
 const PACMAN_START_INDEX = 630;
@@ -19,6 +19,7 @@ const PACMAN_START_DIR = DIRECTIONS.left;
 const NORMAL_PELLET_SCORE_VALUE = 1;
 const POWER_PELLET_SCORE_VALUE = 10;
 const GHOST_EATEN_SCORE_VALUE = 200;
+const HIGH_SCORES_DISPLAYABLE = 10;
 
 // Dynamic Game Variables
 let currentLevelArray = [];
@@ -34,6 +35,9 @@ let ghostsEaten = 0;
 let pelletsLeft = 0;
 let consecutiveGhostsEaten = 0;
 let validKeysPressed = [];
+let gameIsActive = false;
+let newHighScore = false;
+let highScoreIndex = -1;
 // TIMER IDs
 let pacmanTimerID = NaN;
 let powerPelletTimerID = NaN;
@@ -88,7 +92,7 @@ let currentLevelData = [...levelOne];
 // ******************************************************************************************************
 // HELPER FUNCTIONS
 // ******************************************************************************************************
-const createElement = (elementTag, parent, className="", innerHTML="") => {
+const createElement = (elementTag, parent, className = "", innerHTML = "") => {
   let element = document.createElement(elementTag);
   element.className = className;
   element.innerHTML = innerHTML;
@@ -96,15 +100,16 @@ const createElement = (elementTag, parent, className="", innerHTML="") => {
   return element;
 }
 
-const createModal = (className, headerText) => {
+const createModal = (className, headerText, onClose = undefined) => {
   let body = document.querySelector("body");
   let modalWrapper = createElement("div", body, "modal-wrapper");
   let modal = createElement("div", modalWrapper, `modal ${className}`);
-  let modalTopContainer = createElement("div", modal, "modal-top-container");
+  let modalTopContainer = createElement("div", modal, "modal-header");
   createElement("h2", modalTopContainer, "", headerText);
   let exitBtn = createElement("button", modalTopContainer, "", "✕");
   exitBtn.onclick = () => {
     modalWrapper.remove();
+    if (onClose) onClose();
   };
   return modal;
 }
@@ -115,7 +120,7 @@ const createModal = (className, headerText) => {
 
 const loadMainMenu = () => {
   let body = document.querySelector("body");
-  let startContainer = createElement("div", body, "start-container");
+  let startContainer = createElement("section", body, "start-container");
 
   // Create Header
   createElement("h1", startContainer, "menu-header", "Pac-Man");
@@ -145,7 +150,10 @@ const loadMainMenu = () => {
 
   let instructionBtn = createElement("button", startContainer, "instruction-btn", "How To Play");
   instructionBtn.onclick = displayInstructionalModal;
-  
+
+  let highScoreBtn = createElement("button", startContainer, "highscore-btn", "High Scores");
+  highScoreBtn.onclick = displayHighScores;
+
   let startButton = createElement("button", startContainer, "start-btn", "Play");
   startButton.onclick = transitionToGame;
 };
@@ -161,20 +169,19 @@ const transitionToGame = () => {
   setTimeout(() => {
     startContainer.remove();
 
-    createElement("h1", body, "", "Pac-Man");
+    let gameContainer = createElement("section", body, "game-container");
 
-    let topContainer = createElement("div", body, "game-top-container");
+    createElement("h1", gameContainer, "", "Pac-Man");
+
+    let topContainer = createElement("div", gameContainer, "game-header");
     // Create Label for Score and Lives
     createElement("p", topContainer, "", `Score: <span class="score">${currentScore}</span>`);
     createElement("p", topContainer, "", `Lives: <span class="lives">${currentLives}</span>`);
 
-    let grid = createElement("div", body, "grid");
-    body.appendChild(grid);
+    createElement("div", gameContainer, "grid");
 
-    let bottomContainer = createElement("div", body, "game-bottom-container");
-
-    let highScoreBtn = createElement("button", bottomContainer, "", "High Scores");
-    // highScoreBtn.onclick = displayHighScores;
+    // TODO: Show life count below game board
+    // let bottomContainer = createElement("div", gameContainer, "game-bottom-container");
 
     createBoard();
     startGame();
@@ -183,15 +190,6 @@ const transitionToGame = () => {
 
 const displayInstructionalModal = () => {
   let modal = createModal("instructional-modal", "How To Play");
-
-  // let modalTopContainer = createElement("div", modal, "modal-top-container");
-
-  // createElement("h2", modalTopContainer, "", "How To Play");
-
-  // let exitBtn = createElement("button", modalTopContainer, "", "✕");
-  // exitBtn.onclick = () => {
-  //   modalWrapper.remove();
-  // };
 
   let instructionalContent = createElement("div", modal, "instructional-content");
 
@@ -298,6 +296,8 @@ const updateLives = (lifeAmt) => {
 };
 
 const startGame = () => {
+  if (gameIsActive) return;
+  gameIsActive = true;
   playAudio("sfx/pacman_beginning.mp3");
   let timerID = NaN;
   let delayInSeconds = Math.floor(GAME_START_DELAY);
@@ -325,9 +325,10 @@ const startGame = () => {
   }, remainderDelay);
 };
 
-const stopGame = (timeBeforeReset) => {
+const stopGame = (timeBeforeReset = 0) => {
+  gameIsActive = false;
   clearInterval(pacmanTimerID);
-  ghostSirenSFX.pause();
+  if (ghostSirenSFX) ghostSirenSFX.pause();
 
   // Stop Ghost timer
   ghosts.forEach((ghost) => {
@@ -405,24 +406,32 @@ const clearGame = () => {
 
 const gameOver = () => {
   pelletsLeft = 0;
-
-  displayGameOver();
-  setTimeout(() => {
-    removeGameOverDisplay();
+  updateHighScores();
+  // If new high score acheived, display text and then reset high score value indicator
+  displayGameText((newHighScore ? "New Highscore!" : "Game Over!"), 2500, () => {
+    displayHighScores();
+    newHighScore = false;
+    highScoreIndex = -1;
     clearGame();
-    startGame();
-  }, 2500);
+    // startGame();
+  });
 }
 
-const displayGameOver = () => {
-  // Create game over label and add to grid container
+const displayGameText = (text, displayTime, actionAfterDisplay) => {
+  // Create game text label and add to grid container
   let grid = document.querySelector(".grid");
-  createElement("div", grid, "game-over-label", "Game Over!");
+  createElement("div", grid, "game-text-label", text);
+  // After given display time, remove text and complete action after display
+  setTimeout(() => {
+    removeGameTextDisplay();
+    actionAfterDisplay();
+  }, displayTime);
 }
 
-const removeGameOverDisplay = () => {
-  let gameOverLabel = document.querySelector(".game-over-label");
-  gameOverLabel.remove();
+const removeGameTextDisplay = () => {
+  // Find game text label and remove it
+  let gameTextLabel = document.querySelector(".game-text-label");
+  gameTextLabel.remove();
 }
 
 const resetGame = () => {
@@ -437,7 +446,95 @@ const resetGame = () => {
   }
 };
 
-const playAudio = (path, shouldLoop=false) => {
+const displayHighScores = () => {
+  let modal = createModal("highscore-modal", "Top High Scores");
+
+  let highScoreContent = createElement("div", modal, "highscore-content");
+
+  let table = createElement("table", highScoreContent, "highscore-table");
+  let headerRow = createElement("tr", table, "header-row");
+
+  createElement("th", headerRow, "rank-label", "Rank");
+  createElement("th", headerRow, "date-label", "Date");
+  createElement("th", headerRow, "score-label", "Score");
+  createElement("th", headerRow, "ghosts-eaten-label", "Ghosts Eaten");
+  createElement("th", headerRow, "date-label", "Levels Complete");
+
+  // Get list of high scores from local storage in parsed format
+  let highScoreList = JSON.parse(localStorage.getItem("highscores"));
+  highScoreList = highScoreList ? highScoreList : [];
+
+  // Iterate through high scores
+  for (let i = 0; i < HIGH_SCORES_DISPLAYABLE; i++) {
+    let highScore = highScoreList[i];
+    if (highScore === undefined) {
+      highScore = {
+        date: "-",
+        score: "-",
+        ghosts: "-",
+        levels: "-"
+      }
+    }
+    let scoreRow = createElement("tr", table, "score-row");
+    // If row matches player's score, change font to yellow
+    if (i === highScoreIndex) scoreRow.style.color = "yellow";
+
+    createElement("td", scoreRow, "rank", i + 1);
+    createElement("td", scoreRow, "date", highScore.date);
+    createElement("td", scoreRow, "score", highScore.score);
+    createElement("td", scoreRow, "ghosts-eaten", highScore.ghosts);
+    createElement("td", scoreRow, "levels-complete", highScore.levels);
+  }
+}
+
+const sortHighScores = (highScoreList, currentStats) => {
+  let sortedHighScores = [...highScoreList, currentStats];
+
+  // sort high scores by ascending values starting with score, then levels complete, then ghosts eaten (else don't sort)
+  sortedHighScores = [currentStats, ...highScoreList].sort((a, b) => {
+    if (a.score !== b.score) {
+      return b.score - a.score;
+    } else if (a.levelsComplete !== b.levelsComplete) {
+      return b.levelsComplete - a.levelsComplete;
+    } else if (a.ghostsEaten !== b.ghostsEaten) {
+      return b.ghostsEaten - a.ghostsEaten;
+    } else {
+      // return true so current stats aren't accidentally counted as high score when matching another existing score
+      return true;
+    }
+  });
+
+  highScoreIndex = sortedHighScores.indexOf(currentStats);
+
+  if (highScoreIndex === 0) {
+    newHighScore = true;
+  }
+
+  return sortedHighScores;
+}
+
+const updateHighScores = () => {
+  if (typeof (Storage) !== "undefined") {
+    let currentDate = new Date().toLocaleString();
+
+    let currentStats = {
+      date: currentDate,
+      score: currentScore,
+      ghosts: ghostsEaten,
+      levels: levelsComplete
+    }
+
+    let savedHighScores = JSON.parse(localStorage.getItem("highscores"));
+    // Verify not null (if not, keep value; otherwise, value is empty array)
+    savedHighScores = savedHighScores ? savedHighScores : [];
+
+    let updatedHighScores = sortHighScores(savedHighScores, currentStats);
+
+    window.localStorage.setItem('highscores', JSON.stringify(updatedHighScores));
+  }
+}
+
+const playAudio = (path, shouldLoop = false) => {
   let audio = new Audio(path);
   audio.loop = shouldLoop;
   audio.play();
@@ -694,13 +791,13 @@ class Ghost {
 
   move(direction) {
     // Remove ghost current position; if touching ghost but not pacman, only remove name
-    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length+1 &&
-        !currentLevelArray[this.currentIndex].classList.contains("pacman")) {
+    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length + 1 &&
+      !currentLevelArray[this.currentIndex].classList.contains("pacman")) {
       currentLevelArray[this.currentIndex].classList.remove(this.name);
     } else {
       currentLevelArray[this.currentIndex].classList.remove(...this.classList);
     }
-      //.remove(...this.classList);
+    //.remove(...this.classList);
     this.currentIndex = direction;
     currentLevelArray[this.currentIndex].classList.add(...this.classList);
     this.handleCollision();

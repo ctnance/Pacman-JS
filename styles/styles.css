@@ -16,11 +16,11 @@ body {
 
 body {
   color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
   font-family: "Press Start 2P", "Courier New", Courier, monospace;
-  position: fixed;
+  /* position: fixed; */
   width: 100%;
   overflow: hidden;
 }
@@ -48,14 +48,6 @@ p {
 /* CUSTOM STYLES */
 
 /* Main Menu Styles */
-
-.start-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: opacity 1s;
-  width: 50%;
-}
 
 .menu-header {
   margin-bottom: 2em;
@@ -87,8 +79,8 @@ p {
   max-width: 550px;
 }
 
-.instruction-btn {
-  max-width: 225px;
+.instruction-btn, .highscore-btn {
+  max-width: 314px;
 }
 
 .start-container button:hover,
@@ -122,7 +114,7 @@ p {
   z-index: 100;
 }
 
-.modal-top-container {
+.modal-header {
   position: relative;
   left: 0;
   text-align: left;
@@ -163,7 +155,41 @@ p {
   margin-top: 1px;
 }
 
+.highscore-modal {
+  max-width: 985px;
+  width: 80%;
+}
+
+table {
+  width: 100%;
+  text-align: center;
+  overflow-x: scroll;
+  overflow-y: scroll;
+}
+
+th {
+  width: 150px;
+}
+
+td {
+  min-width: 160px;
+  height: 4em;
+}
+
+tr .date {
+  max-width: 250px;
+}
+
 /* Game Styles */
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  width: 100%;
+  transition: opacity 1s;
+}
 
 .grid {
   background-color: black;
@@ -189,7 +215,7 @@ p {
 }
 
 .start-timer,
-.game-over-label {
+.game-text-label {
   position: absolute;
   top: 50%;
   left: 0;
@@ -207,7 +233,7 @@ p {
   font-size: 3em;
 }
 
-.game-over-label {
+.game-text-label {
   font-size: 1.5em;
 }
 
@@ -324,8 +350,12 @@ p {
   }
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* MEDIA QUERIES */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 @media screen and (max-width: 1150px) {
-  .modal {
+  .instructional-modal {
     width: 60%;
   }
   .grid {
@@ -335,7 +365,7 @@ p {
 }
 
 @media screen and (max-width: 950px) {
-  .modal {
+  .instructional-modal {
     width: 70%;
   }
   .item0 {
@@ -344,7 +374,7 @@ p {
 }
 
 @media screen and (max-width: 850px) {
-  .modal {
+  .instructional-modal {
     width: 90%;
   }
 
@@ -366,7 +396,6 @@ p {
   }
 }
 
-/* Media Queries */
 @media screen and (max-width: 650px) {
   .modal {
     width: 90%;
@@ -386,7 +415,7 @@ p {
   }
 
   .start-timer,
-  .game-over-label {
+  .game-text-label {
     transform: translateY(-66%);
   }
 
@@ -394,7 +423,7 @@ p {
     font-size: 2em;
   }
 
-  .game-over-label {
+  .game-text-label {
     font-size: 1em;
   }
 
@@ -426,7 +455,7 @@ p {
     max-height: 482px;
   }
   .start-timer,
-  .game-over-label {
+  .game-text-label {
     width: 100px;
   }
   .item0 {
@@ -452,7 +481,7 @@ p {
   .start-timer {
     font-size: 1.65em;
   }
-  .game-over-label {
+  .game-text-label {
     font-size: 0.9em;
   }
   .item0 {
@@ -499,7 +528,7 @@ p {
     font-size: 1.25em;
   }
 
-  .game-over-label {
+  .game-text-label {
     font-size: 0.75em;
   }
 
@@ -539,27 +568,27 @@ p {
   .start-container button {
     padding: .5em;
   }
-  .game-top-container {
+  .game-header {
     display: flex;
   }  
-  .game-top-container > * {
+  .game-header > * {
     margin-right: 2em;
   }
-  .game-top-container p:last-child {
+  .game-header p:last-child {
     margin-right: 0;
   }
   .grid {
     width: 32%;
   }
   .start-timer,
-  .game-over-label {
+  .game-text-label {
     width: 75px;
     transform: translateY(-70%);
   }
   .start-timer {
     font-size: .75em;
   }
-  .game-over-label {
+  .game-text-label {
     font-size: 0.5em;
   }
   .item0 {
