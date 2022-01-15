@@ -160,8 +160,8 @@ const loadMainMenu = () => {
 
 const transitionToGame = () => {
   let body = document.querySelector("body");
-  let btn = document.querySelector(".start-btn");
-  btn.disabled = true;
+  let btns = document.querySelectorAll("button");
+  btns.forEach(btn => btn.disabled = true);
 
   let startContainer = document.querySelector(".start-container");
   startContainer.style.opacity = "0";

@@ -486,24 +486,22 @@ section {
   h1 {
     font-size: 1.5em;
   }
-
   .modal {
     top: 8%;
     width: 95%;
   }
-
+  .modal h2 {
+    font-size: 1.35em;
+  }
   .instructional-modal h3 {
     font-size: 1em;
   }
-
   .instructional-modal p {
     font-size: 0.7em;
   }
-
   .instructional-modal button {
     font-size: 1.5em;
   }
-
   .character-label {
     display: flex;
     align-content: flex-end;
@@ -511,29 +509,39 @@ section {
     height: 2em;
     margin-top: 0;
   }
-
+  table {
+    padding-right: 2em;
+  }
+  tr {
+    font-size: .8em;
+  }
+  th {
+    width: 115px;
+  }
+  td {
+    min-width: 100px;
+    height: 4em;
+  }
+  tr .date {
+    max-width: 150px;
+  }
   .grid {
     max-width: 375px;
     max-height: 396px;
   }
-
   .start-timer {
     font-size: 1.25em;
   }
-
   .game-text-label {
     font-size: 0.75em;
   }
-
   .item0 {
     border: 3.75px solid black;
   }
-
   .item3 {
     border: 3px solid black;
     animation-name: "grow-small";
   }
-
   @keyframes grow-small {
     0% {
       border-width: 3px;
