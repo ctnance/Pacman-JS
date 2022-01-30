@@ -13,7 +13,8 @@ const VICTORY_PAUSE_TIME = 2500;
 const INPUT_DELAY = 300; // delay when input resets--in case player inputs a move a little early
 const STARTING_LIVES = 3;
 const PACMAN_SPEED = 265; // 214
-const POWER_PELLET_TIME = 10000;
+const POWER_PELLET_TIME = 8000;
+const GHOST_WARNING_TIME = 2500;
 const PACMAN_START_INDEX = 630;
 const PACMAN_START_DIR = DIRECTIONS.left;
 const NORMAL_PELLET_SCORE_VALUE = 1;
@@ -37,6 +38,7 @@ let consecutiveGhostsEaten = 0;
 let validKeysPressed = [];
 let gameIsActive = false;
 let newHighScore = false;
+let shouldResetGame = false;
 let highScoreIndex = -1;
 // TIMER IDs
 let pacmanTimerID = NaN;
@@ -98,7 +100,7 @@ const createElement = (elementTag, parent, className = "", innerHTML = "") => {
   element.innerHTML = innerHTML;
   parent.appendChild(element);
   return element;
-}
+};
 
 const createModal = (className, headerText, onClose = undefined) => {
   let body = document.querySelector("body");
@@ -107,12 +109,32 @@ const createModal = (className, headerText, onClose = undefined) => {
   let modalTopContainer = createElement("div", modal, "modal-header");
   createElement("h2", modalTopContainer, "", headerText);
   let exitBtn = createElement("button", modalTopContainer, "", "✕");
-  exitBtn.onclick = () => {
-    modalWrapper.remove();
-    if (onClose) onClose();
+  let closeModal = (e) => {
+    // Close modal if node is button or the modal wrapper
+    if (
+      e.target.classList.contains("modal-wrapper") ||
+      e.target.nodeName === "BUTTON"
+    ) {
+      modalWrapper.remove();
+      if (onClose) onClose();
+      if (shouldResetGame) {
+        shouldResetGame = false;
+        startGame();
+      }
+    }
   };
+  exitBtn.onclick = closeModal;
+  modalWrapper.onclick = closeModal;
   return modal;
-}
+};
+
+const playAudio = (path, shouldLoop = false) => {
+  let audio = new Audio(path);
+  audio.loop = shouldLoop;
+  audio.play();
+
+  return audio;
+};
 
 // ******************************************************************************************************
 // Menu Logic
@@ -148,10 +170,20 @@ const loadMainMenu = () => {
   let clydeDisplay = createCharacter("clyde");
   characterRow.appendChild(clydeDisplay);
 
-  let instructionBtn = createElement("button", startContainer, "instruction-btn", "How To Play");
+  let instructionBtn = createElement(
+    "button",
+    startContainer,
+    "instruction-btn",
+    "How To Play"
+  );
   instructionBtn.onclick = displayInstructionalModal;
 
-  let highScoreBtn = createElement("button", startContainer, "highscore-btn", "High Scores");
+  let highScoreBtn = createElement(
+    "button",
+    startContainer,
+    "highscore-btn",
+    "High Scores"
+  );
   highScoreBtn.onclick = displayHighScores;
 
   let startButton = createElement("button", startContainer, "start-btn", "Play");
@@ -161,7 +193,7 @@ const loadMainMenu = () => {
 const transitionToGame = () => {
   let body = document.querySelector("body");
   let btns = document.querySelectorAll("button");
-  btns.forEach(btn => btn.disabled = true);
+  btns.forEach((btn) => (btn.disabled = true));
 
   let startContainer = document.querySelector(".start-container");
   startContainer.style.opacity = "0";
@@ -175,8 +207,18 @@ const transitionToGame = () => {
 
     let topContainer = createElement("div", gameContainer, "game-header");
     // Create Label for Score and Lives
-    createElement("p", topContainer, "", `Score: <span class="score">${currentScore}</span>`);
-    createElement("p", topContainer, "", `Lives: <span class="lives">${currentLives}</span>`);
+    createElement(
+      "p",
+      topContainer,
+      "",
+      `Score: <span class="score">${currentScore}</span>`
+    );
+    createElement(
+      "p",
+      topContainer,
+      "",
+      `Lives: <span class="lives">${currentLives}</span>`
+    );
 
     createElement("div", gameContainer, "grid");
 
@@ -191,18 +233,20 @@ const transitionToGame = () => {
 const displayInstructionalModal = () => {
   let modal = createModal("instructional-modal", "How To Play");
 
-  let instructionalContent = createElement("div", modal, "instructional-content");
+  let instructionalContent = createElement("div", modal, "modal-content");
 
   // Create Control Label
   createElement("h3", instructionalContent, "", "Controls");
   // Set Controls text and content
-  let controlText = "<p>To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.</p>";
+  let controlText =
+    "<p>To play, use the arrow (or WASD) keys in order to move Pacman. On mobile devices, you can also swipe in the direction you want Pacman to move.</p>";
   createElement("div", instructionalContent, "", controlText);
   // Set Objective Label
   createElement("h3", instructionalContent, "", "Objective");
   // Set Objective text and content
-  let objectiveText = "<p>To win, Pacman must eat all dots on the map.</p><p>The special orange dots, called Power Pellets, power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn.</p><p>Also, ghosts move faster after each level completed!</p><p>The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?</p>";
-  createElement("div", instructionalContent, "", objectiveText)
+  let objectiveText =
+    "<p>To win, Pacman must eat all dots on the map.</p><p>The special orange dots, called Power Pellets, power-up Pacman. They are also worth more points. When pacman eats a Power Pellet, he temporarily gains the ability to eat ghosts. The more ghosts eaten consecutively, the more points you will earn.</p><p>Also, ghosts move faster after each level completed!</p><p>The game is over when Pacman is eaten by the ghosts and runs out of lives. How high of a score can you get?</p>";
+  createElement("div", instructionalContent, "", objectiveText);
 };
 
 const createCharacter = (className) => {
@@ -292,7 +336,6 @@ const updateLives = (lifeAmt) => {
   if (currentLives < 0) {
     currentLives = 0;
   }
-
 };
 
 const startGame = () => {
@@ -309,7 +352,6 @@ const startGame = () => {
 
   setTimeout(() => {
     timerID = setInterval(() => {
-
       if (delayInSeconds < 1000) {
         clearInterval(timerID);
         startTimerLabel.remove();
@@ -364,10 +406,10 @@ const resetCharacters = () => {
     delete ghost;
   });
   // Recreate ghosts
-  let blinkySpeed = Math.max(200, 250 - (levelsComplete * 10));
-  let pinkySpeed = Math.max(350, 400 - (levelsComplete * 10));
-  let inkySpeed = Math.max(350, 300 - (levelsComplete * 10));
-  let clydeSpeed = Math.max(450, 500 - (levelsComplete * 10));
+  let blinkySpeed = Math.max(200, 250 - levelsComplete * 10);
+  let pinkySpeed = Math.max(350, 400 - levelsComplete * 10);
+  let inkySpeed = Math.max(350, 300 - levelsComplete * 10);
+  let clydeSpeed = Math.max(450, 500 - levelsComplete * 10);
   ghosts = [
     new Ghost("blinky", 348, blinkySpeed, 0),
     new Ghost("pinky", 376, pinkySpeed, 1100),
@@ -386,7 +428,6 @@ const clearGame = () => {
     let scoreLabel = document.querySelector(".score");
     scoreLabel.innerHTML = 0;
   }
-
 
   // Reset level data
   currentLevelData = [...levelOne];
@@ -408,14 +449,14 @@ const gameOver = () => {
   pelletsLeft = 0;
   updateHighScores();
   // If new high score acheived, display text and then reset high score value indicator
-  displayGameText((newHighScore ? "New Highscore!" : "Game Over!"), 2500, () => {
+  displayGameText(newHighScore ? "New Highscore!" : "Game Over!", 2500, () => {
+    shouldResetGame = true;
     displayHighScores();
     newHighScore = false;
     highScoreIndex = -1;
     clearGame();
-    // startGame();
   });
-}
+};
 
 const displayGameText = (text, displayTime, actionAfterDisplay) => {
   // Create game text label and add to grid container
@@ -426,13 +467,13 @@ const displayGameText = (text, displayTime, actionAfterDisplay) => {
     removeGameTextDisplay();
     actionAfterDisplay();
   }, displayTime);
-}
+};
 
 const removeGameTextDisplay = () => {
   // Find game text label and remove it
   let gameTextLabel = document.querySelector(".game-text-label");
   gameTextLabel.remove();
-}
+};
 
 const resetGame = () => {
   resetCharacters();
@@ -449,7 +490,7 @@ const resetGame = () => {
 const displayHighScores = () => {
   let modal = createModal("highscore-modal", "Top High Scores");
 
-  let highScoreContent = createElement("div", modal, "highscore-content");
+  let highScoreContent = createElement("div", modal, "modal-content");
 
   let table = createElement("table", highScoreContent, "highscore-table");
   let headerRow = createElement("tr", table, "header-row");
@@ -472,8 +513,8 @@ const displayHighScores = () => {
         date: "-",
         score: "-",
         ghosts: "-",
-        levels: "-"
-      }
+        levels: "-",
+      };
     }
     let scoreRow = createElement("tr", table, "score-row");
     // If row matches player's score, change font to yellow
@@ -485,7 +526,7 @@ const displayHighScores = () => {
     createElement("td", scoreRow, "ghosts-eaten", highScore.ghosts);
     createElement("td", scoreRow, "levels-complete", highScore.levels);
   }
-}
+};
 
 const sortHighScores = (highScoreList, currentStats) => {
   let sortedHighScores = [...highScoreList, currentStats];
@@ -511,18 +552,18 @@ const sortHighScores = (highScoreList, currentStats) => {
   }
 
   return sortedHighScores;
-}
+};
 
 const updateHighScores = () => {
-  if (typeof (Storage) !== "undefined") {
+  if (typeof Storage !== "undefined") {
     let currentDate = new Date().toLocaleString();
 
     let currentStats = {
       date: currentDate,
       score: currentScore,
       ghosts: ghostsEaten,
-      levels: levelsComplete
-    }
+      levels: levelsComplete,
+    };
 
     let savedHighScores = JSON.parse(localStorage.getItem("highscores"));
     // Verify not null (if not, keep value; otherwise, value is empty array)
@@ -530,17 +571,9 @@ const updateHighScores = () => {
 
     let updatedHighScores = sortHighScores(savedHighScores, currentStats);
 
-    window.localStorage.setItem('highscores', JSON.stringify(updatedHighScores));
+    window.localStorage.setItem("highscores", JSON.stringify(updatedHighScores));
   }
-}
-
-const playAudio = (path, shouldLoop = false) => {
-  let audio = new Audio(path);
-  audio.loop = shouldLoop;
-  audio.play();
-
-  return audio;
-}
+};
 
 const clearItemFromGrid = (itemName, index) => {
   currentLevelData[index] = 4;
@@ -563,7 +596,7 @@ const moveIsValid = (direction) => {
 const pacmanDestroyed = () => {
   pacmanIsAlive = false;
   updateLives(--currentLives);
-  playAudio("sfx/pacman_death_sound.mp3")
+  playAudio("sfx/pacman_death_sound.mp3");
   stopGame(PACMAN_DEATH_ANIMATION_TIME);
 };
 
@@ -724,9 +757,16 @@ class Ghost {
   toggleIsScared(isScared) {
     if (isScared && !this.classList.includes("scared")) {
       this.classList.push("scared");
+      // Flash warning when preparing to unscare
+      setTimeout(() => {
+        this.classList.push("flash");
+      }, POWER_PELLET_TIME - GHOST_WARNING_TIME);
     } else {
       currentLevelArray[this.currentIndex].classList.remove("scared");
-      this.classList.pop();
+      currentLevelArray[this.currentIndex].classList.remove("flash");
+      this.classList = this.classList.filter(
+        (elem) => elem !== "scared" && elem !== "flash"
+      );
     }
     this.isScared = isScared;
   }
@@ -791,13 +831,15 @@ class Ghost {
 
   move(direction) {
     // Remove ghost current position; if touching ghost but not pacman, only remove name
-    if (currentLevelArray[this.currentIndex].classList.length > this.classList.length + 1 &&
-      !currentLevelArray[this.currentIndex].classList.contains("pacman")) {
+    if (
+      currentLevelArray[this.currentIndex].classList.length >
+        this.classList.length + 1 &&
+      !currentLevelArray[this.currentIndex].classList.contains("pacman")
+    ) {
       currentLevelArray[this.currentIndex].classList.remove(this.name);
     } else {
       currentLevelArray[this.currentIndex].classList.remove(...this.classList);
     }
-    //.remove(...this.classList);
     this.currentIndex = direction;
     currentLevelArray[this.currentIndex].classList.add(...this.classList);
     this.handleCollision();

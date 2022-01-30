@@ -16,11 +16,10 @@ body {
 
 body {
   color: white;
-  /* display: flex; */
-  /* flex-direction: column; */
-  /* align-items: center; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-family: "Press Start 2P", "Courier New", Courier, monospace;
-  /* position: fixed; */
   width: 100%;
   overflow: hidden;
 }
@@ -45,7 +44,23 @@ p {
   margin: 0 0 0.5em 0;
 }
 
-/* CUSTOM STYLES */
+table {
+  width: 100%;
+  text-align: center;
+}
+
+th {
+  width: 150px;
+}
+
+td {
+  min-width: 160px;
+  height: 4em;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* CUSTOM CLASS STYLES */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Main Menu Styles */
 
@@ -79,12 +94,14 @@ p {
   max-width: 550px;
 }
 
-.instruction-btn, .highscore-btn {
+.instruction-btn,
+.highscore-btn {
   max-width: 314px;
 }
 
 .start-container button:hover,
 .start-container button:focus {
+  cursor: pointer;
   border-color: #fff;
   color: #fff;
 }
@@ -93,37 +110,38 @@ p {
 
 .modal-wrapper {
   background-color: hsla(0, 0%, 20%, 0.5);
+  position: fixed;
   width: 100vw;
   height: 100vh;
-  position: fixed;
   z-index: 100;
 }
 
 .modal {
-  position: relative;
+  position: fixed;
+  top: 12.5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   border: 4px solid white;
   border-radius: 1em;
   width: 50%;
   max-height: 80%;
+  height: 80%;
   background-color: black;
-  padding: 1em;
-  top: 12.5%;
-  left: 50%;
   transform: translateX(-50%);
-  overflow-y: auto;
   z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.modal-header {
-  position: relative;
-  left: 0;
-  text-align: left;
+.modal .modal-header {
+  margin: 2em;
+}
+
+.modal .modal-content {
+  position: absolute;
   width: 100%;
-}
-
-.instructional-content {
-  display: block;
-  margin-top: 3em;
+  height: calc(100% - 140px);
+  overflow-y: auto;
 }
 
 .instructional-modal h3 {
@@ -139,7 +157,7 @@ p {
   border-radius: 1em;
   background-color: transparent;
   color: white;
-  position: fixed;
+  position: absolute;
   font-size: 2.5em;
   top: 0;
   right: 0;
@@ -148,6 +166,7 @@ p {
 
 .modal button:hover,
 .modal button:focus {
+  cursor: pointer;
   color: red;
 }
 
@@ -156,24 +175,15 @@ p {
 }
 
 .highscore-modal {
-  max-width: 985px;
+  /* max-width: 985px; */
+  max-width: 1200px;
   width: 80%;
 }
 
-table {
-  width: 100%;
-  text-align: center;
-  overflow-x: scroll;
-  overflow-y: scroll;
-}
-
-th {
-  width: 150px;
-}
-
-td {
-  min-width: 160px;
-  height: 4em;
+.header-row {
+  background-color: black;
+  position: sticky;
+  top: 0;
 }
 
 tr .date {
@@ -188,7 +198,16 @@ section {
   align-items: center;
   position: fixed;
   width: 100%;
+  max-height: 100%;
   transition: opacity 1s;
+}
+
+.start-container {
+  width: 80%;
+}
+
+.game-container {
+  text-align: center;
 }
 
 .grid {
@@ -255,14 +274,16 @@ section {
   background-color: orange;
   border: 6px solid black;
   border-radius: 50%;
-  animation-name: "grow";
-  animation-duration: 1.5s;
-  animation-iteration-count: infinite;
+  animation: "grow" 1.5s infinite;
 }
 
 .item4 {
   background-color: black;
 }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* CHARACTER STYLES */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 .pacman {
   position: relative;
@@ -315,10 +336,29 @@ section {
 }
 
 .scared {
-  background-color: blue !important;
+  background-color: blue;
 }
 
-/* Animations */
+.flash {
+  background-color: transparent;
+  animation: "flash" 0.5s infinite;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* KEYFRAME ANIMATIONS */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+@keyframes flash {
+  0% {
+    background-color: blue;
+  }
+  50% {
+    background-color: white;
+  }
+  100% {
+    background-color: blue;
+  }
+}
 
 @keyframes grow {
   0% {
@@ -513,7 +553,7 @@ section {
     padding-right: 2em;
   }
   tr {
-    font-size: .8em;
+    font-size: 0.8em;
   }
   th {
     width: 115px;
@@ -557,7 +597,7 @@ section {
 
 @media only screen and (max-width: 1000px) and (orientation: landscape) {
   h1 {
-    margin-top: .75em;
+    margin-top: 0.75em;
     font-size: 1.25em;
   }
   .menu-header {
@@ -567,11 +607,11 @@ section {
     font-size: 1.5em;
   }
   .start-container button {
-    padding: .5em;
+    padding: 0.5em;
   }
   .game-header {
     display: flex;
-  }  
+  }
   .game-header > * {
     margin-right: 2em;
   }
@@ -587,7 +627,7 @@ section {
     transform: translateY(-70%);
   }
   .start-timer {
-    font-size: .75em;
+    font-size: 0.75em;
   }
   .game-text-label {
     font-size: 0.5em;
