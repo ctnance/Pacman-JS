@@ -18,7 +18,7 @@ const PACMAN_START_DIR = DIRECTIONS.left;
 const NORMAL_PELLET_SCORE_VALUE = 10;
 const POWER_PELLET_SCORE_VALUE = 50;
 const GHOST_EATEN_SCORE_VALUE = 200;
-const EXTRA_LIFE_SCORE_REQUIREMENT = 10000;
+const EXTRA_LIFE_SCORE_REQUIREMENT = 100;
 const HIGH_SCORES_DISPLAYABLE = 10;
 
 // Dynamic Game Variables
@@ -30,6 +30,7 @@ let moveQueued = 0;
 let pacmanIsAlive = true;
 let pacmanPoweredUp = false;
 let currentScore = 0;
+let pointsToExtraLife = 0;
 let levelsComplete = 0;
 let ghostsEaten = 0;
 let pelletsLeft = 0;
@@ -522,8 +523,10 @@ const addLifeIndicator = () => {
 const incrementScore = (point) => {
   let scoreLabel = document.querySelector(".score");
   currentScore += point;
+  pointsToExtraLife += point;
   scoreLabel.innerHTML = currentScore;
-  if (currentScore % EXTRA_LIFE_SCORE_REQUIREMENT === 0) {
+  if (pointsToExtraLife > EXTRA_LIFE_SCORE_REQUIREMENT) {
+    pointsToExtraLife -= EXTRA_LIFE_SCORE_REQUIREMENT;
     playAudio('sfx/extra-life.mp3');
     updateLives(++currentLives);
   }
