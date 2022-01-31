@@ -1,5 +1,3 @@
-// TODO: Add Responsive design for modal (text and button issues)
-
 // GAME BOARD DIMENSIONS
 const WIDTH = 28;
 const HEIGHT = 30;
@@ -17,9 +15,10 @@ const POWER_PELLET_TIME = 8000;
 const GHOST_WARNING_TIME = 2500;
 const PACMAN_START_INDEX = 630;
 const PACMAN_START_DIR = DIRECTIONS.left;
-const NORMAL_PELLET_SCORE_VALUE = 1;
-const POWER_PELLET_SCORE_VALUE = 10;
+const NORMAL_PELLET_SCORE_VALUE = 10;
+const POWER_PELLET_SCORE_VALUE = 50;
 const GHOST_EATEN_SCORE_VALUE = 200;
+const EXTRA_LIFE_SCORE_REQUIREMENT = 10000;
 const HIGH_SCORES_DISPLAYABLE = 10;
 
 // Dynamic Game Variables
@@ -119,6 +118,7 @@ const createModal = (className, headerText, onClose = undefined) => {
       if (onClose) onClose();
       if (shouldResetGame) {
         shouldResetGame = false;
+        addLifeIndicator();
         startGame();
       }
     }
@@ -222,10 +222,8 @@ const transitionToGame = () => {
 
     createElement("div", gameContainer, "grid");
 
-    // TODO: Show life count below game board
-    // let bottomContainer = createElement("div", gameContainer, "game-bottom-container");
-
     createBoard();
+    addLifeIndicator();
     startGame();
   }, 1250);
 };
@@ -264,7 +262,7 @@ const createCharacter = (className) => {
     createElement("div", character, "pacman-mouth");
   }
 
-  character.addEventListener("mouseenter", (e) => {
+  let activateCharacterLabel = () => {
     let characterLabel = document.querySelector(".character-label");
     characterLabel.innerHTML = className;
     switch (className) {
@@ -288,9 +286,25 @@ const createCharacter = (className) => {
       default:
         characterLabel.style.color = "white";
     }
-  });
+  }
 
-  character.addEventListener("mouseleave", (e) => {
+  character.addEventListener("mouseenter", activateCharacterLabel);
+
+  character.addEventListener("touchstart", () => {
+    activateCharacterLabel();
+    setTimeout(() => {
+      let characterLabel = document.querySelector(".character-label");
+      characterLabel.innerHTML = "The Characters";
+      characterLabel.style.color = "white";
+
+      if (className === "pacman") {
+        let pacmanMouth = document.querySelector(".pacman-mouth");
+        pacmanMouth.style.animationName = "none";
+      }
+    }, 2000);
+  }, false);
+
+  character.addEventListener("mouseleave", () => {
     let characterLabel = document.querySelector(".character-label");
     characterLabel.innerHTML = "The Characters";
     characterLabel.style.color = "white";
@@ -314,10 +328,194 @@ const createBoard = () => {
 
   for (let i = 0; i < currentLevelData.length; i++) {
     let item = createElement("div", grid, `item${currentLevelData[i]}`);
+    currentLevelArray.push(item);
     if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
       pelletsLeft++;
+    } else if (currentLevelData[i] === 1) {
+      styleWall(currentLevelArray[i], i);
+    } else if (currentLevelData[i] === 2) {
+      if ((currentLevelData[i + DIRECTIONS.left] === 1 && currentLevelData[i + (DIRECTIONS.right * 2)] === 1) || (currentLevelData[i + DIRECTIONS.right] === 1 && currentLevelData[i + (DIRECTIONS.left * 2)] === 1)) {
+        currentLevelArray[i].classList.add("ghost-zone-wall");
+      }
     }
-    currentLevelArray.push(item);
+  }
+};
+
+const styleWall = (gridItem, indexLocation) => {
+  // gridItem.classList.add("wall");
+  // Top Left Wall
+  if (indexLocation === 0) {
+    gridItem.classList.add("upper-left-wall", "horizontal-wall");
+
+    // Top Right Wall
+  } else if (indexLocation === 27) {
+    gridItem.classList.add("upper-right-wall", "horizontal-wall");
+
+    // Bottom Left Wall
+  } else if (indexLocation === 812) {
+    gridItem.classList.add("lower-left-wall", "horizontal-wall");
+
+    // Bottom Right Wall
+  } else if (indexLocation === 839) {
+    gridItem.classList.add("lower-right-wall", "horizontal-wall");
+
+    // Top Walls
+  } else if (indexLocation < 28) {
+    // If another wall is below this wall
+    if (currentLevelData[indexLocation + 28] === 1) {
+      if (currentLevelData[indexLocation + 27] !== 1) {
+        gridItem.classList.add("upper-right-wall", "horizontal-wall");
+      } else if (currentLevelData[indexLocation + 29] !== 1) {
+        gridItem.classList.add("upper-left-wall", "horizontal-wall");
+      }
+    } else {
+      gridItem.classList.add("upper-wall", "horizontal-wall");
+    }
+
+    // Bottom Walls
+  } else if (indexLocation > 811) {
+    gridItem.classList.add("lower-wall", "horizontal-wall");
+
+    // Left Walls
+  } else if (indexLocation % 28 === 0) {
+    // If another wall is next to this wall
+    // Form a top wall if above a portal
+    if (currentLevelData[indexLocation + 28] === 5) {
+      gridItem.classList.add("upper-wall", "horizontal-wall");
+      // Form a bottom wall if below a portal
+    } else if (currentLevelData[indexLocation - 28] === 5) {
+      gridItem.classList.add("lower-wall", "horizontal-wall");
+      // Connect to any adjacent walls
+    } else if (currentLevelData[indexLocation + 1] === 1) {
+      if (currentLevelData[indexLocation - 27] === 4) {
+        gridItem.classList.add("upper-left-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation + 29] === 4) {
+        gridItem.classList.add("lower-left-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation - 27] !== 1) {
+        gridItem.classList.add("lower-left-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation + 29] !== 1) {
+        gridItem.classList.add("upper-left-wall", "vertical-wall");
+      }
+    } else {
+      gridItem.classList.add("left-wall", "vertical-wall");
+    }
+
+    // Right Walls
+  } else if ((indexLocation + 1) % 28 === 0) {
+    // If another wall is next to this wall
+    if (currentLevelData[indexLocation + 28] === 6) {
+      gridItem.classList.add("upper-wall", "horizontal-wall");
+    } else if (currentLevelData[indexLocation - 28] === 6) {
+      gridItem.classList.add("lower-wall", "horizontal-wall");
+    } else if (currentLevelData[indexLocation - 1] === 1) {
+      if (currentLevelData[indexLocation - 29] === 4) {
+        gridItem.classList.add("upper-right-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation + 27] === 4) {
+        gridItem.classList.add("lower-right-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation - 29] !== 1) {
+        gridItem.classList.add("lower-right-wall", "vertical-wall");
+      } else if (currentLevelData[indexLocation + 27] !== 1) {
+        gridItem.classList.add("upper-right-wall", "vertical-wall");
+      }
+    } else {
+      gridItem.classList.add("right-wall", "vertical-wall");
+    }
+    // Walls inside bordering walls
+  } else {
+    // Check for vertically adjacent walls
+    if (
+      (currentLevelData[indexLocation - 1] !== 1 &&
+        (currentLevelData[indexLocation + 1] === 1 || currentLevelData[indexLocation + 1] === 2)) || (currentLevelData[indexLocation + 1] === 4 && currentLevelData[indexLocation - 1] === 0)
+    ) {
+      gridItem.classList.add("right-wall", "wall");
+    } else if (
+      ((currentLevelData[indexLocation - 1] === 1 || currentLevelData[indexLocation - 1] === 2) &&
+        currentLevelData[indexLocation + 1] !== 1) || (currentLevelData[indexLocation - 1] === 4 && currentLevelData[indexLocation + 1] === 0)
+    ) {
+      gridItem.classList.add("left-wall", "wall");
+    }
+    // Check for indented corners and horizontally adjacent walls
+    if (
+      (currentLevelData[indexLocation + DIRECTIONS.up] !== 1 &&
+        (currentLevelData[indexLocation + DIRECTIONS.down] === 1 || currentLevelData[indexLocation + DIRECTIONS.down] === 2)) || (currentLevelData[indexLocation + DIRECTIONS.down] === 4 && currentLevelData[indexLocation + DIRECTIONS.up] === 0) || (currentLevelArray[indexLocation + DIRECTIONS.left].classList.contains("lower-wall") && currentLevelData[indexLocation + DIRECTIONS.right] === 1 || (currentLevelArray[indexLocation + DIRECTIONS.left].classList.contains("upper-left-corner") && currentLevelData[indexLocation + DIRECTIONS.left] === 1))
+    ) {
+      if (gridItem.classList.contains("right-wall")) {
+        gridItem.classList.remove("right-wall");
+        if (currentLevelData[indexLocation + DIRECTIONS.down] !== 2) {
+          gridItem.classList.add("upper-left-corner");
+        } else {
+          gridItem.classList.add("lower-wall");
+        }
+      } else if (gridItem.classList.contains("left-wall")) {
+        gridItem.classList.remove("left-wall");
+        if (currentLevelData[indexLocation + DIRECTIONS.down] !== 2) {
+          gridItem.classList.add("upper-right-corner");
+        } else {
+          gridItem.classList.add("lower-wall");
+        }
+      } else if (currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.right)] === 1 && currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.left)] === 1) {
+        if (currentLevelData[indexLocation + DIRECTIONS.down] === 1) {
+          if (currentLevelData[indexLocation + (DIRECTIONS.down + DIRECTIONS.left)] !== 1) {
+            gridItem.classList.add("upper-right-wall", "wall");
+          } else if (currentLevelData[indexLocation + (DIRECTIONS.down + DIRECTIONS.right)] !== 1) {
+            gridItem.classList.add("upper-left-wall", "wall");
+          }
+        } else {
+          gridItem.classList.add("upper-wall", "wall");
+        }
+      } else if (currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.right)] === 1 && currentLevelData[indexLocation + (DIRECTIONS.down + DIRECTIONS.right)] === 1) {
+        if (currentLevelData[indexLocation + DIRECTIONS.up] === 1) {
+          if (currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.left)] !== 1) {
+            gridItem.classList.add("lower-right-wall", "wall");
+          }
+        } else {
+          gridItem.classList.add("lower-wall", "wall");
+        }
+      } else {
+        gridItem.classList.add("lower-wall", "wall");
+      }
+    } else if (
+      (currentLevelData[indexLocation + DIRECTIONS.down] !== 1 &&
+        (currentLevelData[indexLocation + DIRECTIONS.up] === 1 || currentLevelData[indexLocation - 28] === 2)) || (currentLevelData[indexLocation - 28] === 4 && currentLevelData[indexLocation + 28] === 0) || (currentLevelArray[indexLocation - 1].classList.contains("upper-wall") && currentLevelData[indexLocation + 1] === 1 || (currentLevelArray[indexLocation - 1].classList.contains("lower-left-corner") && currentLevelData[indexLocation + 1] === 1))
+    ) {
+      if (gridItem.classList.contains("right-wall")) {
+        gridItem.classList.remove("right-wall");
+        gridItem.classList.add("lower-left-corner");
+      } else if (gridItem.classList.contains("left-wall")) {
+        gridItem.classList.remove("left-wall");
+        gridItem.classList.add("lower-right-corner");
+      }
+      else if (currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.right)] === 1 && currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.left)] === 1) {
+        if (currentLevelData[indexLocation + DIRECTIONS.down] === 1) {
+          if (currentLevelData[indexLocation + (DIRECTIONS.down + DIRECTIONS.left)] !== 1) {
+            gridItem.classList.add("upper-right-wall", "wall");
+          }
+        } else {
+          gridItem.classList.add("upper-wall", "wall");
+        }
+      } else {
+        gridItem.classList.add("upper-wall", "wall");
+      }
+    } else {
+      if (currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.right)] === 1 && currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.left)] === 1) {
+        if (currentLevelData[indexLocation + DIRECTIONS.down] === 1 && currentLevelData[indexLocation + (DIRECTIONS.down + DIRECTIONS.right)] !== 1) {
+          gridItem.classList.add("upper-left-wall", "wall");
+        }
+      } else {
+        if (currentLevelData[indexLocation + DIRECTIONS.up] === 1 && currentLevelData[indexLocation + (DIRECTIONS.up + DIRECTIONS.right)] !== 1) {
+          gridItem.classList.add("lower-left-wall", "wall");
+        }
+      }
+    }
+  }
+};
+
+const addLifeIndicator = () => {
+  let grid = document.querySelector(".grid");
+  let lifeIndicator = createElement("div", grid, "life-indicator");
+
+  for (let i = 0; i < currentLives; i++) {
+    createElement("div", lifeIndicator, "life-icon");
   }
 };
 
@@ -325,17 +523,38 @@ const incrementScore = (point) => {
   let scoreLabel = document.querySelector(".score");
   currentScore += point;
   scoreLabel.innerHTML = currentScore;
+  if (currentScore % EXTRA_LIFE_SCORE_REQUIREMENT === 0) {
+    playAudio('sfx/extra-life.mp3');
+    updateLives(++currentLives);
+  }
 };
 
 const updateLives = (lifeAmt) => {
   currentLives = lifeAmt;
 
-  let livesLabel = document.querySelector(".lives");
-  livesLabel.innerHTML = currentLives;
-
   if (currentLives < 0) {
     currentLives = 0;
+  } else {
+    let lifeIcons = document.querySelectorAll(".life-icon");
+    if (lifeIcons.length > currentLives) {
+      for (let i = 0; i < lifeIcons.length - currentLives; i++) {
+        let index = lifeIcons.length - (1 + i);
+        lifeIcons[index].style.animationName = "shrink";
+        setTimeout(() => {
+          lifeIcons[index].remove();
+        }, 500);
+      }
+    } else if (lifeIcons.length < currentLives) {
+      let lifeIndicator = document.querySelector(".life-indicator");
+      for (let i = 0; i < (currentLives - lifeIcons.length); i++) {
+        let lifeIcon = createElement("div", lifeIndicator, "life-icon");
+        lifeIcon.style.animation = "appear 0.5s 1";
+      }
+    }
   }
+
+  let livesLabel = document.querySelector(".lives");
+  livesLabel.innerHTML = currentLives;
 };
 
 const startGame = () => {
@@ -349,6 +568,7 @@ const startGame = () => {
   // Create timer label and add to grid container
   let grid = document.querySelector(".grid");
   let startTimerLabel = createElement("div", grid, "start-timer", "");
+  updateLives(currentLives);
 
   setTimeout(() => {
     timerID = setInterval(() => {
@@ -411,7 +631,7 @@ const resetCharacters = () => {
   let inkySpeed = Math.max(350, 300 - levelsComplete * 10);
   let clydeSpeed = Math.max(450, 500 - levelsComplete * 10);
   ghosts = [
-    new Ghost("blinky", 348, blinkySpeed, 0),
+    new Ghost("blinky", 294, blinkySpeed, 0),
     new Ghost("pinky", 376, pinkySpeed, 1100),
     new Ghost("inky", 351, inkySpeed, 2200),
     new Ghost("clyde", 379, clydeSpeed, 3300),
@@ -441,6 +661,9 @@ const clearGame = () => {
 
     if (currentLevelData[i] === 0 || currentLevelData[i] === 3) {
       pelletsLeft++;
+    } else if (currentLevelData[i] === 1) {
+      styleWall(currentLevelArray[i], i);
+      currentLevelArray[i].classList.add(i);
     }
   }
 };
@@ -483,6 +706,8 @@ const resetGame = () => {
     }
     startGame();
   } else {
+    let lifeIndicator = document.querySelector(".life-indicator");
+    lifeIndicator.remove();
     gameOver();
   }
 };
@@ -833,7 +1058,7 @@ class Ghost {
     // Remove ghost current position; if touching ghost but not pacman, only remove name
     if (
       currentLevelArray[this.currentIndex].classList.length >
-        this.classList.length + 1 &&
+      this.classList.length + 1 &&
       !currentLevelArray[this.currentIndex].classList.contains("pacman")
     ) {
       currentLevelArray[this.currentIndex].classList.remove(this.name);
@@ -876,10 +1101,10 @@ class Ghost {
 }
 
 let ghosts = [
-  new Ghost("blinky", 348, 250, 0),
+  new Ghost("blinky", 294, 250, 0),
   new Ghost("pinky", 376, 400, 1100),
-  new Ghost("inky", 351, 300, 2200),
-  new Ghost("clyde", 379, 500, 3300),
+  new Ghost("inky", 377, 300, 2200),
+  new Ghost("clyde", 378, 500, 3300),
 ];
 
 const createGhosts = (ghosts) => {

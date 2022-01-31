@@ -251,6 +251,7 @@ section {
   align-items: center;
   justify-content: center;
   transform: translateY(-72%);
+  z-index: 50;
 }
 
 .start-timer {
@@ -259,6 +260,30 @@ section {
 
 .game-text-label {
   font-size: 1.5em;
+}
+
+.game-footer {
+  width: 100%;
+}
+
+.life-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  transform: translateY(100%);
+}
+
+.life-icon {
+  background-color: yellow;
+  border-radius: 50%;
+  transform: scale(1);
+  width: 1.75em;
+  height: 1.75em;
+  margin: 0.75em 0.25em;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
 }
 
 .item0 {
@@ -290,11 +315,16 @@ section {
 /* CHARACTER STYLES */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+.display {
+  transform: scale(1) !important;
+}
 .pacman {
   position: relative;
   background-color: yellow;
   border-radius: 50%;
   border: none;
+  transform: scale(1.15);
+  z-index: 5;
 }
 
 .pacman-mouth {
@@ -322,6 +352,8 @@ section {
   border-top-right-radius: 50% !important;
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+  z-index: 5;
+  transform: scale(1.15);
 }
 
 .blinky {
@@ -347,6 +379,135 @@ section {
 .flash {
   background-color: transparent;
   animation: "flash" 0.5s infinite;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* BORDER WALL STYLES */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+.ghost-zone-wall,
+.wall,
+.horizontal-wall,
+.vertical-wall {
+  position: relative;
+  z-index: 0;
+}
+
+.ghost-zone-wall::before {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid white;
+  width: 100%;
+  z-index: 0;
+}
+
+.upper-right-corner,
+.upper-left-corner,
+.lower-right-corner,
+.lower-left-corner {
+  width: 50%;
+  height: 50%;
+}
+
+.upper-right-corner {
+  border-top-right-radius: 100%;
+  justify-self: start;
+  align-self: end;
+}
+
+.upper-left-corner {
+  border-top-left-radius: 100%;
+  justify-self: end;
+  align-self: end;
+}
+
+.lower-right-corner {
+  border-bottom-right-radius: 100%;
+  justify-self: start;
+  align-self: start;
+}
+
+.lower-left-corner {
+  border-bottom-left-radius: 100%;
+  justify-self: end;
+  align-self: start;
+}
+
+.upper-left-wall::after,
+.upper-right-wall::after,
+.lower-left-wall::after,
+.lower-right-wall::after,
+.upper-wall::after,
+.lower-wall::after,
+.left-wall::after,
+.right-wall::after {
+  content: "";
+  position: absolute;
+  background-color: black;
+}
+
+/* .upper-right-corner::after,
+.upper-left-corner::after,
+.lower-right-corner::after,
+.lower-left-corner::after {
+  background-color: darkblue;
+} */
+
+.upper-left-wall::after {
+  width: 50%;
+  height: 50%;
+  bottom: 0;
+  right: 0;
+}
+
+.upper-right-wall::after {
+  width: 50%;
+  height: 50%;
+  bottom: 0;
+  left: 0;
+}
+
+.lower-left-wall::after {
+  width: 50%;
+  height: 50%;
+  top: 0;
+  right: 0;
+}
+
+.lower-right-wall::after {
+  width: 50%;
+  height: 50%;
+  top: 0;
+  left: 0;
+}
+
+.upper-wall::after {
+  width: 100%;
+  height: 50%;
+  bottom: 0;
+  right: 0;
+}
+
+.lower-wall::after {
+  width: 100%;
+  height: 50%;
+  top: 0;
+  right: 0;
+}
+
+.left-wall::after {
+  width: 50%;
+  height: 100%;
+  top: 0;
+  right: 0;
+}
+
+.right-wall::after {
+  width: 50%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -377,6 +538,24 @@ section {
   }
 }
 
+@keyframes appear {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shrink {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
 @keyframes eat-right {
   0% {
     clip-path: polygon(100% 74%, 44% 48%, 100% 21%);
@@ -402,6 +581,10 @@ section {
 @media screen and (max-width: 1150px) {
   .instructional-modal {
     width: 60%;
+  }
+  .life-icon {
+    width: 1.5em;
+    height: 1.5em;
   }
   .grid {
     width: 90%;
@@ -448,6 +631,10 @@ section {
   .instructional-modal p {
     font-size: 0.8em;
   }
+  .life-icon {
+    width: 1.25em;
+    height: 1.25em;
+  }
   .grid {
     width: 92%;
     max-width: 600px;
@@ -456,19 +643,15 @@ section {
   .game-text-label {
     transform: translateY(-66%);
   }
-
   .start-timer {
     font-size: 2em;
   }
-
   .game-text-label {
     font-size: 1em;
   }
-
   .item0 {
     border: 5px solid black;
   }
-
   .item3 {
     border: 2px solid black;
     animation-name: "grow-med";
@@ -547,6 +730,10 @@ section {
   .instructional-modal button {
     font-size: 1.5em;
   }
+  .highscore-modal button {
+    top: 0%;
+    right: 2%;
+  }
   .character-label {
     display: flex;
     align-content: flex-end;
@@ -569,6 +756,10 @@ section {
   }
   tr .date {
     max-width: 150px;
+  }
+  .life-icon {
+    width: 1em;
+    height: 1em;
   }
   .grid {
     max-width: 375px;
@@ -600,7 +791,7 @@ section {
   }
 }
 
-@media only screen and (max-width: 1000px) and (orientation: landscape) {
+@media only screen and (max-width: 920px) and (orientation: landscape) {
   h1 {
     margin-top: 0.75em;
     font-size: 1.25em;
