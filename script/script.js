@@ -633,8 +633,8 @@ const resetCharacters = () => {
   ghosts = [
     new Ghost("blinky", 294, blinkySpeed, 0),
     new Ghost("pinky", 376, pinkySpeed, 1100),
-    new Ghost("inky", 351, inkySpeed, 2200),
-    new Ghost("clyde", 379, clydeSpeed, 3300),
+    new Ghost("inky", 377, inkySpeed, 2200),
+    new Ghost("clyde", 378, clydeSpeed, 3300),
   ];
 };
 
