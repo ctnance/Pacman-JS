@@ -144,6 +144,11 @@ td {
   overflow-y: auto;
 }
 
+.instructional-modal .modal-content {
+  padding-right: 2em;
+  padding-left: 2em;
+}
+
 .instructional-modal h3 {
   margin-top: 1.5em;
 }
