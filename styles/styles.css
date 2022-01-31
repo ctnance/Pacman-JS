@@ -697,8 +697,8 @@ section {
     font-size: 2em;
   }
   .grid {
-    max-width: 400px;
-    max-height: 428.5px;
+    width: 100%;
+    border: none;
   }
   .character-label {
     font-size: 1.5em;
@@ -762,15 +762,11 @@ section {
     max-width: 150px;
   }
   .life-indicator {
-    bottom: -6%; 
+    bottom: -6%;
   }
   .life-icon {
     width: 1em;
     height: 1em;
-  }
-  .grid {
-    width: 100%;
-    border: none;
   }
   .start-timer,
   .game-text-label {
