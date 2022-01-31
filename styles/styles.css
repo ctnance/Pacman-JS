@@ -205,6 +205,10 @@ section {
   width: 100%;
   max-height: 100%;
   transition: opacity 1s;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
 }
 
 .start-container {
@@ -757,13 +761,20 @@ section {
   tr .date {
     max-width: 150px;
   }
+  .life-indicator {
+    bottom: -6%; 
+  }
   .life-icon {
     width: 1em;
     height: 1em;
   }
   .grid {
-    max-width: 375px;
-    max-height: 396px;
+    width: 100%;
+    border: none;
+  }
+  .start-timer,
+  .game-text-label {
+    transform: translateY(-55%);
   }
   .start-timer {
     font-size: 1.25em;
