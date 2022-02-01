@@ -589,7 +589,7 @@ const incrementScore = (point) => {
   scoreLabel.innerHTML = currentScore;
   if (pointsToExtraLife > EXTRA_LIFE_SCORE_REQUIREMENT) {
     pointsToExtraLife -= EXTRA_LIFE_SCORE_REQUIREMENT;
-    playAudio("sfx/extra-life.mp3");
+    playAudio("sfx/extra_life.mp3");
     updateLives(++currentLives);
   }
 };
@@ -625,7 +625,7 @@ const updateLives = (lifeAmt) => {
 const startGame = () => {
   if (gameIsActive) return;
   gameIsActive = true;
-  playAudio("sfx/pacman_beginning.mp3");
+  playAudio("sfx/level_start.mp3");
   let timerID = NaN;
   let delayInSeconds = Math.floor(GAME_START_DELAY);
   let remainderDelay = GAME_START_DELAY % delayInSeconds;
@@ -886,7 +886,7 @@ const moveIsValid = (direction) => {
 const pacmanDestroyed = () => {
   pacmanIsAlive = false;
   updateLives(--currentLives);
-  playAudio("sfx/pacman_death_sound.mp3");
+  playAudio("sfx/pacman_death.mp3");
   stopGame(PACMAN_DEATH_ANIMATION_TIME);
 };
 
@@ -1274,3 +1274,18 @@ function handleTouchMove(e) {
 }
 
 loadMainMenu();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("sw.js")
+    .then((registration) => {
+      console.log("SW Registered!");
+      console.log(registration);
+    })
+    .catch((error) => {
+      console.log("SW Registration Failed.");
+      console.log(error);
+    });
+} else {
+  console.log("PWA not supported.");
+}

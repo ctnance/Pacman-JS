@@ -93,6 +93,7 @@ td {
   display: -ms-flexbox;
   display: flex;
   gap: 1em;
+  margin-bottom: 1em;
 }
 
 .start-container button {
@@ -104,7 +105,7 @@ td {
   font-size: 1em;
   font-weight: bold;
   text-transform: uppercase;
-  margin-top: 1em;
+  margin-bottom: 1em;
   padding: 1em;
 }
 
@@ -419,6 +420,13 @@ section {
   -webkit-transform: scale(1.15);
   -ms-transform: scale(1.15);
   transform: scale(1.15);
+}
+
+.blinky::after,
+.pinky::after,
+.inky::after,
+.clyde::after {
+  border: none !important;
 }
 
 .blinky {
@@ -770,8 +778,7 @@ section {
     font-size: 0.9em;
   }
   .start-btn {
-    width: 550px;
-    max-width: 90%;
+    max-width: 314px;
   }
   .grid {
     width: 90%;
