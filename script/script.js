@@ -120,6 +120,7 @@ const createModal = (className, headerText, onClose = undefined) => {
       if (shouldResetGame) {
         shouldResetGame = false;
         addLifeIndicator();
+        clearGame();
         startGame();
       }
     }
@@ -582,7 +583,7 @@ const addLifeIndicator = () => {
   }
 };
 
-const incrementScore = (point) => {
+const increaseScore = (point) => {
   let scoreLabel = document.querySelector(".score");
   currentScore += point;
   pointsToExtraLife += point;
@@ -599,25 +600,26 @@ const updateLives = (lifeAmt) => {
 
   if (currentLives < 0) {
     currentLives = 0;
-  } else {
-    let lifeIcons = document.querySelectorAll(".life-icon");
-    if (lifeIcons.length > currentLives) {
-      for (let i = 0; i < lifeIcons.length - currentLives; i++) {
-        let index = lifeIcons.length - (1 + i);
-        lifeIcons[index].style.animationName = "shrink";
-        setTimeout(() => {
-          lifeIcons[index].remove();
-        }, 500);
-      }
-    } else if (lifeIcons.length < currentLives) {
-      let lifeIndicator = document.querySelector(".life-indicator");
-      for (let i = 0; i < currentLives - lifeIcons.length; i++) {
-        let lifeIcon = createElement("div", lifeIndicator, "life-icon");
-        lifeIcon.style.animation = "appear 0.5s 1";
-      }
+  }
+  let lifeIcons = document.querySelectorAll(".life-icon");
+  // Handle a life lost
+  if (lifeIcons.length > currentLives) {
+    for (let i = 0; i < lifeIcons.length - currentLives; i++) {
+      let index = lifeIcons.length - (1 + i);
+      lifeIcons[index].style.animationName = "shrink";
+      setTimeout(() => {
+        lifeIcons[index].remove();
+      }, 500);
+    }
+    //  Handle a life gained
+  } else if (lifeIcons.length < currentLives) {
+    let lifeIndicator = document.querySelector(".life-indicator");
+    if (!lifeIndicator) return;
+    for (let i = 0; i < currentLives - lifeIcons.length; i++) {
+      let lifeIcon = createElement("div", lifeIndicator, "life-icon");
+      lifeIcon.style.animation = "appear 0.5s 1";
     }
   }
-
   let livesLabel = document.querySelector(".lives");
   livesLabel.innerHTML = currentLives;
 };
@@ -728,7 +730,15 @@ const clearGame = () => {
       pelletsLeft++;
     } else if (currentLevelData[i] === 1) {
       styleWall(currentLevelArray[i], i);
-      currentLevelArray[i].classList.add(i);
+    } else if (currentLevelData[i] === 2) {
+      if (
+        (currentLevelData[i + DIRECTIONS.left] === 1 &&
+          currentLevelData[i + DIRECTIONS.right * 2] === 1) ||
+        (currentLevelData[i + DIRECTIONS.right] === 1 &&
+          currentLevelData[i + DIRECTIONS.left * 2] === 1)
+      ) {
+        currentLevelArray[i].classList.add("ghost-zone-wall");
+      }
     }
   }
 };
@@ -742,7 +752,6 @@ const gameOver = () => {
     displayHighScores();
     newHighScore = false;
     highScoreIndex = -1;
-    clearGame();
   });
 };
 
@@ -771,8 +780,6 @@ const resetGame = () => {
     }
     startGame();
   } else {
-    let lifeIndicator = document.querySelector(".life-indicator");
-    lifeIndicator.remove();
     gameOver();
   }
 };
@@ -988,7 +995,7 @@ const updatePelletsRemaining = () => {
 const eatNormalPellet = () => {
   updatePelletsRemaining();
   playAudio("sfx/pacman_munch.mp3");
-  incrementScore(NORMAL_PELLET_SCORE_VALUE);
+  increaseScore(NORMAL_PELLET_SCORE_VALUE);
   clearItemFromGrid("item0", pacmanIndex);
 };
 
@@ -996,7 +1003,7 @@ const activatePowerPellet = () => {
   // Update Pellets remaining
   updatePelletsRemaining();
   // Update Score
-  incrementScore(POWER_PELLET_SCORE_VALUE);
+  increaseScore(POWER_PELLET_SCORE_VALUE);
   pacmanPoweredUp = true;
   clearItemFromGrid("item3", pacmanIndex);
 
@@ -1152,7 +1159,7 @@ class Ghost {
     if (this.isRetreating) return;
     ghostsEaten++;
     consecutiveGhostsEaten++;
-    incrementScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
+    increaseScore(GHOST_EATEN_SCORE_VALUE * consecutiveGhostsEaten);
     playAudio("sfx/eat_ghost.mp3");
     this.isRetreating = true;
     currentLevelArray[this.currentIndex].classList.remove(...this.classList);
