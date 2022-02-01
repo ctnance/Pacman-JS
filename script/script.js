@@ -132,8 +132,9 @@ const createModal = (className, headerText, onClose = undefined) => {
 const playAudio = (path, shouldLoop = false) => {
   let audio = new Audio(path);
   audio.loop = shouldLoop;
-  audio.play();
-
+  audio.addEventListener("canplaythrough", () => {
+    audio.play();
+  });
   return audio;
 };
 
